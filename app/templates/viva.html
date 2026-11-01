@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viva Examination – Project Viva Simulator</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/futuristic.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="/static/js/theme.js"></script>
+</head>
+<body class="fui-viva-body">
+  <div class="holo-grid" aria-hidden="true"></div>
+  <div class="glow-orb orb-cyan" style="opacity:0.3;" aria-hidden="true"></div>
+
+  <!-- ══════════════════ NAVBAR ══════════════════ -->
+  <nav class="fui-navbar" id="fuiNavbar">
+    <div class="fui-nav-brand">
+      <a href="/dashboard" class="fui-nav-link" style="font-size:0.85rem;">← Dashboard</a>
+      <span style="color:#2a3a55;margin:0 0.5rem;">|</span>
+      <span style="font-family:var(--font-display,Orbitron);font-size:0.9rem;font-weight:700;color:#94a3b8;letter-spacing:0.1em;">VIVA EXAMINATION</span>
+    </div>
+    <div class="fui-nav-links" id="fuiNavLinks">
+      <button id="themeToggleBtn" class="fui-theme-btn" title="Toggle theme">
+        <span class="theme-icon">☀️</span>
+      </button>
+      <span class="fui-status-badge" id="sessionInfo" style="background:rgba(0,245,255,0.06);border:1px solid rgba(0,245,255,0.15);color:var(--neon-cyan);font-size:0.72rem;padding:0.3rem 0.75rem;border-radius:6px;font-weight:700;letter-spacing:0.05em;">Loading…</span>
+      <span id="scoreDisplay" style="font-family:var(--font-display,Orbitron);font-size:0.85rem;font-weight:800;color:#f1f5f9;letter-spacing:0.1em;">Score: —</span>
+      <button class="fui-btn-secondary" id="navEndExamBtn" style="padding:0.4rem 0.9rem;font-size:0.8rem;border-color:rgba(239,68,68,0.3);color:#f87171;">
+        End Exam ⏹
+      </button>
+    </div>
+    <button class="fui-hamburger" id="mobileMenuBtn"><span></span><span></span><span></span></button>
+  </nav>
+
+  <!-- Main Viva Layout -->
+  <div class="fui-viva-wrapper">
+
+    <!-- Left Column: Examination Flow -->
+    <div class="fui-viva-main">
+
+      <!-- 1. Progress Bar -->
+      <div class="fui-exam-progress">
+        <div class="fui-progress-meta">
+          <span class="fui-progress-label" id="progressLabel">QUESTION 0 / 0</span>
+          <span class="fui-difficulty-badge diff-medium" id="difficultyBadge">MEDIUM</span>
+        </div>
+        <div class="fui-progress-bar">
+          <div class="fui-progress-fill" id="examProgressFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- 2. 3D AI Examiner Card -->
+      <div class="fui-examiner-card">
+        <div class="fui-examiner-avatar">
+          <div class="examiner-3d" id="examinerAvatar3d">
+            <canvas id="examiner3dCanvas" style="width:100%;height:100%;border-radius:50%;position:absolute;inset:0;z-index:2;"></canvas>
+            <div class="examiner-ring er1"></div>
+            <div class="examiner-ring er2"></div>
+            <span id="examinerEmoji" style="position:relative;z-index:3;font-size:1.8rem;">🎓</span>
+          </div>
+        </div>
+
+        <div class="fui-examiner-info">
+          <div class="fui-examiner-name" id="examinerName">AI EXAMINER</div>
+          <div class="fui-examiner-state" id="examinerStateEl">
+            <span class="state-indicator" style="color:#00f5ff;"></span>
+            <span id="examinerStateText">Ready to begin examination</span>
+          </div>
+
+          <!-- Personality selector -->
+          <div class="examiner-personality-selector">
+            <button class="personality-btn active" data-personality="professor" data-emoji="🎓">🎓 Prof</button>
+            <button class="personality-btn" data-personality="strict" data-emoji="👨‍💼">👨‍💼 Strict</button>
+            <button class="personality-btn" data-personality="expert" data-emoji="🔬">🔬 Expert</button>
+            <button class="personality-btn" data-personality="supervisor" data-emoji="📋">📋 Supervisor</button>
+          </div>
+        </div>
+
+        <!-- Voice controls -->
+        <div id="voiceExaminerControls" style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem;">
+          <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:#94a3b8;cursor:pointer;white-space:nowrap;">
+            <input type="checkbox" id="autoVoiceToggle" checked style="accent-color:var(--neon-cyan);" />
+            Auto Voice
+          </label>
+          <div style="display:flex;gap:0.35rem;">
+            <button class="personality-btn" id="speakQuestionBtn" title="Speak question">🔊</button>
+            <button class="personality-btn" id="muteBtn" title="Mute">🔇</button>
+          </div>
+          <!-- Waveform indicator -->
+          <div class="fui-waveform paused" id="examinerWaveform">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Question Panel -->
+      <div class="fui-question-panel" id="questionBlock">
+        <div class="fui-question-topic-badge" id="questionTopic">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Loading topic…
+        </div>
+        <div class="fui-question-text" id="questionText">
+          <div class="skeleton-fui" style="height:20px;width:90%;margin-bottom:8px;"></div>
+          <div class="skeleton-fui" style="height:20px;width:75%;"></div>
+        </div>
+      </div>
+
+      <!-- 4. Answer Section -->
+      <div class="fui-answer-card" id="answerSection">
+
+        <!-- Voice UI -->
+        <div id="voiceUI">
+          <button class="fui-mic-btn" id="micBtn">
+            <span class="mic-icon">🎤</span>
+            <span id="micBtnText">Click to record voice answer</span>
+          </button>
+
+          <!-- Recording waveform -->
+          <div class="fui-waveform paused" id="recordingWaveform" style="justify-content:center;margin-bottom:0.75rem;display:none;">
+            <div class="wave-bar" style="background:#ef4444;"></div>
+            <div class="wave-bar" style="background:#ef4444;"></div>
+            <div class="wave-bar" style="background:#ef4444;"></div>
+            <div class="wave-bar" style="background:#ef4444;"></div>
+            <div class="wave-bar" style="background:#ef4444;"></div>
+            <div class="wave-bar" style="background:#ef4444;"></div>
+            <div class="wave-bar" style="background:#ef4444;"></div>
+            <div class="wave-bar" style="background:#ef4444;"></div>
+          </div>
+
+          <div id="recordingStatus" style="font-size:0.78rem;color:#64748b;text-align:center;margin-bottom:0.75rem;">
+            Groq Whisper STT – speak clearly after clicking
+          </div>
+
+          <div id="transcriptionArea" style="display:none;">
+            <label class="fui-form-label">Voice Transcription (edit if needed)</label>
+            <textarea id="transcriptionText" class="fui-answer-textarea" rows="2" placeholder="Your speech will appear here…" style="min-height:70px;"></textarea>
+          </div>
+        </div>
+
+        <!-- Text answer -->
+        <div class="fui-form-group" style="margin-top:0.75rem;">
+          <label class="fui-form-label" for="answerTextarea">Your Technical Answer</label>
+          <textarea
+            id="answerTextarea"
+            class="fui-answer-textarea"
+            rows="6"
+            placeholder="Type or dictate your answer here… Explain your reasoning, trade-offs, and technical rationale."
+          ></textarea>
+          <div style="display:flex;justify-content:space-between;margin-top:0.4rem;">
+            <span style="font-size:0.72rem;color:#64748b;" id="charCount">0 characters</span>
+            <span style="font-size:0.72rem;color:#64748b;">Minimum 20 chars for best evaluation</span>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;margin-top:0.75rem;">
+          <div style="display:flex;gap:0.5rem;">
+            <button class="fui-btn-outline" id="skipBtn" style="padding:0.6rem 1rem;font-size:0.85rem;">Skip</button>
+            <button style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);color:#f87171;padding:0.6rem 1rem;border-radius:10px;font-size:0.82rem;cursor:pointer;transition:all 0.2s;" id="endExamEarlyBtn">End Exam</button>
+          </div>
+          <button class="fui-btn-primary" id="submitBtn" disabled style="padding:0.75rem 1.5rem;">
+            <span class="fui-btn-glow"></span>
+            <span class="btn-text">Submit Answer →</span>
+            <span class="btn-spinner" style="display:none;">⏳ Evaluating…</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 5. Feedback Panel -->
+      <div class="fui-feedback-card" id="feedbackPanel">
+
+        <div class="fui-score-display">
+          <div>
+            <div class="fui-score-number" id="feedbackScoreNum">—</div>
+            <div style="font-size:0.7rem;color:#64748b;margin-top:0.2rem;">out of 100</div>
+          </div>
+          <div>
+            <span class="fui-correctness-badge" id="correctnessBadge">—</span>
+            <div style="font-size:0.75rem;color:#64748b;margin-top:0.35rem;" id="questionTopicBadgeSmall">—</div>
+          </div>
+        </div>
+
+        <!-- Feedback tabs -->
+        <div class="fui-feedback-tabs">
+          <button class="fui-tab-btn active" data-tab="explanation">📚 Explanation</button>
+          <button class="fui-tab-btn" data-tab="strengths">✅ Strengths</button>
+          <button class="fui-tab-btn" data-tab="model">💡 Model Answer</button>
+          <button class="fui-tab-btn" data-tab="evidence">🔍 Evidence</button>
+        </div>
+
+        <div class="fui-tab-content active" id="tab-explanation">
+          <div class="fui-feedback-section">
+            <h4>What You Got Right</h4>
+            <ul class="fui-feedback-list success-list" id="understoodList"></ul>
+          </div>
+          <div class="fui-feedback-section" id="misconceptionsSection">
+            <h4>Missing / Incorrect Concepts</h4>
+            <ul class="fui-feedback-list error-list" id="misconceptionsList"></ul>
+          </div>
+          <div class="fui-feedback-section">
+            <h4>Correct Technical Reasoning</h4>
+            <div class="fui-feedback-text" id="correctReasoning"></div>
+          </div>
+          <div class="fui-feedback-section" id="detailedSection">
+            <h4>Step-by-Step Explanation</h4>
+            <div class="fui-feedback-text" id="detailedExplanation" style="background:rgba(245,158,11,0.04);border-left:2px solid rgba(245,158,11,0.3);"></div>
+          </div>
+          <div class="fui-feedback-section">
+            <h4>Example / Analogy</h4>
+            <div class="fui-feedback-text" id="exampleAnalogy" style="font-family:var(--font-mono);font-size:0.82rem;background:rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+
+        <div class="fui-tab-content" id="tab-strengths">
+          <div class="fui-feedback-section">
+            <h4>Your Strengths</h4>
+            <ul class="fui-feedback-list success-list" id="strengthsList"></ul>
+          </div>
+        </div>
+
+        <div class="fui-tab-content" id="tab-model">
+          <div class="fui-feedback-section">
+            <h4>Improved Model Answer</h4>
+            <div class="fui-feedback-text" id="modelAnswer" style="background:rgba(0,245,255,0.03);border-left:2px solid rgba(0,245,255,0.25);"></div>
+          </div>
+          <div class="fui-feedback-section" id="followUpBox">
+            <h4>Follow-up Question</h4>
+            <div style="padding:0.75rem;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.2);border-radius:10px;">
+              <span id="followUpDiff" style="font-size:0.68rem;font-weight:700;color:#d8b4fe;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:0.35rem;"></span>
+              <div id="followUpQuestion" style="font-size:0.875rem;color:#e2e8f0;line-height:1.7;font-style:italic;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fui-tab-content" id="tab-evidence">
+          <div class="fui-feedback-section">
+            <h4>Project Document Evidence</h4>
+            <ul class="fui-feedback-list" id="evidenceList"></ul>
+          </div>
+        </div>
+
+        <!-- Feedback actions -->
+        <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.25rem;flex-wrap:wrap;">
+          <button class="fui-btn-outline" id="finishExamBtn" style="display:none;padding:0.65rem 1.25rem;font-size:0.875rem;">
+            🏁 Get Report
+          </button>
+          <button class="fui-btn-primary" id="nextQuestionBtn" style="padding:0.75rem 1.5rem;">
+            <span class="fui-btn-glow"></span>
+            Next Question →
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: Session Sidebar -->
+    <aside class="fui-viva-sidebar">
+
+      <!-- Score Ring -->
+      <div class="fui-score-ring-wrap">
+        <svg viewBox="0 0 120 120" width="120" height="120" class="fui-ring-svg">
+          <defs>
+            <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#00f5ff" />
+              <stop offset="100%" style="stop-color:#4f8ef7" />
+            </linearGradient>
+          </defs>
+          <circle cx="60" cy="60" r="48" class="fui-ring-bg" />
+          <circle cx="60" cy="60" r="48" class="fui-ring-fill" id="scoreRing"
+            style="stroke-dasharray:301;stroke-dashoffset:301;transform:rotate(-90deg);transform-origin:60px 60px;" />
+        </svg>
+        <div class="fui-ring-score" id="ringScore">—</div>
+        <div class="fui-ring-sub">avg score</div>
+      </div>
+
+      <!-- Session Stats -->
+      <div class="fui-card" style="margin-bottom:1rem;">
+        <div class="fui-card-title">📊 Session Stats</div>
+        <div class="fui-stat-row"><span>Questions</span><span id="statQuestions">0/0</span></div>
+        <div class="fui-stat-row"><span>✅ Correct</span><span id="statCorrect" style="color:#10b981;">0</span></div>
+        <div class="fui-stat-row"><span>⚡ Partial</span><span id="statPartial" style="color:#f59e0b;">0</span></div>
+        <div class="fui-stat-row"><span>❌ Incorrect</span><span id="statIncorrect" style="color:#f87171;">0</span></div>
+      </div>
+
+      <!-- History -->
+      <div class="fui-card" style="margin-bottom:1rem;">
+        <div class="fui-card-title">📜 Question History</div>
+        <div id="historyList">
+          <div style="font-size:0.8rem;color:#64748b;text-align:center;padding:0.75rem;">No questions answered yet</div>
+        </div>
+      </div>
+
+      <!-- Confidence Tracker -->
+      <div class="fui-card" id="confidenceCard" style="display:none;">
+        <div class="fui-card-title">💭 Confidence Tracker</div>
+        <p style="font-size:0.78rem;color:#64748b;margin-bottom:0.75rem;">How confident were you about your last answer?</p>
+        <div style="display:flex;gap:0.35rem;">
+          <button class="personality-btn" data-conf="1" style="flex:1;font-size:0.7rem;">😰 Low</button>
+          <button class="personality-btn" data-conf="2" style="flex:1;font-size:0.7rem;">🤔 Mid</button>
+          <button class="personality-btn" data-conf="3" style="flex:1;font-size:0.7rem;">😎 High</button>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <!-- Early Exit Modal -->
+  <div class="fui-modal-backdrop" id="earlyExitModal">
+    <div class="fui-modal">
+      <div class="fui-modal-title">⏹ End Examination Early?</div>
+      <div class="fui-modal-body" id="earlyExitModalText">
+        You have answered some questions. Ending now will generate your performance report based on completed answers.
+      </div>
+      <div class="fui-modal-actions">
+        <button class="fui-btn-outline" id="cancelEarlyExitBtn" style="padding:0.6rem 1.2rem;">Continue Exam</button>
+        <button style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:0.6rem 1.2rem;border-radius:10px;cursor:pointer;font-weight:600;transition:all 0.2s;" id="confirmEarlyExitBtn">End & View Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Session ID injected by Flask -->
+  <script>window.SESSION_ID = {{ session_id }};</script>
+
+  <!-- Load all JS -->
+  <script src="/static/js/viva.js"></script>
+  <script src="/static/js/arc_reactor.js"></script>
+
+  <script>
+    // Viva page enhancements
+    (function() {
+      // Theme toggle
+      const themeBtn = document.getElementById('themeToggleBtn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+          const curr = document.documentElement.getAttribute('data-theme') || 'dark';
+          const next = curr === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('viva-theme', next);
+          const icon = themeBtn.querySelector('.theme-icon');
+          if (icon) icon.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+      }
+
+      // Mobile menu
+      const hamburger = document.getElementById('mobileMenuBtn');
+      const navLinks = document.getElementById('fuiNavLinks');
+      if (hamburger && navLinks) {
+        hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
+      }
+
+      // Personality buttons
+      document.querySelectorAll('.personality-btn[data-personality]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.personality-btn[data-personality]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const emoji = btn.dataset.emoji || '🎓';
+          const examinerEl = document.getElementById('examinerEmoji');
+          if (examinerEl) {
+            examinerEl.textContent = emoji;
+          }
+          const nameEl = document.getElementById('examinerName');
+          const names = { professor: 'PROF. AI EXAMINER', strict: 'STRICT EXAMINER', expert: 'TECHNICAL EXPERT', supervisor: 'RESEARCH SUPERVISOR' };
+          if (nameEl) nameEl.textContent = names[btn.dataset.personality] || 'AI EXAMINER';
+        });
+      });
+
+      // Feedback tab system
+      document.querySelectorAll('.fui-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.fui-tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.fui-tab-content').forEach(c => c.classList.remove('active'));
+          btn.classList.add('active');
+          const target = document.getElementById('tab-' + btn.dataset.tab);
+          if (target) target.classList.add('active');
+        });
+      });
+
+      // Examiner state transitions (exposed globally for viva.js to call)
+      window.setExaminerState = function(state) {
+        window._examiner3dState = state;
+        const avatar = document.getElementById('examinerAvatar3d');
+        const stateText = document.getElementById('examinerStateText');
+        const waveform = document.getElementById('examinerWaveform');
+
+        if (!avatar) return;
+
+        avatar.className = 'examiner-3d state-' + state;
+
+        const states = {
+          ready: { text: 'Ready to begin examination', color: '#00f5ff' },
+          talking: { text: 'Reading question aloud…', color: '#00f5ff' },
+          listening: { text: 'Listening to your answer…', color: '#10b981' },
+          thinking: { text: 'Analysing your response…', color: '#f59e0b' },
+          evaluating: { text: 'Evaluating your answer…', color: '#a855f7' },
+          complete: { text: 'Examination complete!', color: '#10b981' },
+        };
+
+        const s = states[state] || states.ready;
+        if (stateText) stateText.textContent = s.text;
+
+        const indicator = document.querySelector('.state-indicator');
+        if (indicator) indicator.style.color = s.color;
+
+        if (waveform) {
+          waveform.classList.toggle('paused', state !== 'talking');
+        }
+      };
+
+      function initExaminer3D() {
+        const canvas = document.getElementById('examiner3dCanvas');
+        if (!canvas || typeof THREE === 'undefined') return;
+
+        const size = 96;
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(size, size);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.z = 4.2;
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const geom = new THREE.IcosahedronGeometry(1.6, 2);
+        const mat = new THREE.MeshBasicMaterial({
+          color: 0x00f5ff,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.65,
+        });
+        const mesh = new THREE.Mesh(geom, mat);
+        group.add(mesh);
+
+        const ringGeom = new THREE.TorusGeometry(1.9, 0.03, 8, 48);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f5ff, transparent: true, opacity: 0.6 });
+        const ring = new THREE.Mesh(ringGeom, ringMat);
+        ring.rotation.x = Math.PI / 3;
+        group.add(ring);
+
+        window._examiner3dState = 'ready';
+
+        let clock = new THREE.Clock();
+        function animate() {
+          requestAnimationFrame(animate);
+          const t = clock.getElapsedTime();
+          const state = window._examiner3dState || 'ready';
+
+          let speed = 1.0;
+          if (state === 'talking') {
+            speed = 2.4;
+            mat.color.setHex(0x00f5ff);
+            ringMat.color.setHex(0x00f5ff);
+          } else if (state === 'listening') {
+            speed = 0.8;
+            mat.color.setHex(0x10b981);
+            ringMat.color.setHex(0x10b981);
+          } else if (state === 'thinking') {
+            speed = 3.2;
+            mat.color.setHex(0xf59e0b);
+            ringMat.color.setHex(0xf59e0b);
+          } else if (state === 'evaluating') {
+            speed = 2.0;
+            mat.color.setHex(0xa855f7);
+            ringMat.color.setHex(0xa855f7);
+          } else {
+            mat.color.setHex(0x00f5ff);
+            ringMat.color.setHex(0x00f5ff);
+          }
+
+          mesh.rotation.y += 0.01 * speed;
+          mesh.rotation.x += 0.005 * speed;
+          ring.rotation.z += 0.015 * speed;
+
+          const pulse = 1 + Math.sin(t * 3 * speed) * 0.06;
+          mesh.scale.set(pulse, pulse, pulse);
+
+          renderer.render(scene, camera);
+        }
+        animate();
+      }
+      setTimeout(initExaminer3D, 150);
+
+      // Score ring update (exposed for viva.js)
+      window.updateScoreRing = function(score) {
+        const ring = document.getElementById('scoreRing');
+        const ringScore = document.getElementById('ringScore');
+        if (!ring) return;
+
+        const circumference = 301;
+        const offset = circumference - (score / 100) * circumference;
+        ring.style.strokeDashoffset = offset;
+
+        if (ringScore) ringScore.textContent = score > 0 ? Math.round(score) : '—';
+      };
+
+      // Modal helpers
+      window.openModal = function(id) {
+        const m = document.getElementById(id);
+        if (m) m.classList.add('open');
+      };
+
+      window.closeModal = function(id) {
+        const m = document.getElementById(id);
+        if (m) m.classList.remove('open');
+      };
+
+      document.getElementById('cancelEarlyExitBtn')?.addEventListener('click', () => closeModal('earlyExitModal'));
+
+      // FUI Toast helper for viva.js
+      window.showFuiToast = function(msg, type = 'info') {
+        const t = document.createElement('div');
+        t.className = `fui-toast ${type}`;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        requestAnimationFrame(() => t.classList.add('show'));
+        setTimeout(() => {
+          t.classList.remove('show');
+          setTimeout(() => t.remove(), 400);
+        }, 3500);
+      };
+
+      // Confidence tracker
+      document.querySelectorAll('[data-conf]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-conf]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+
+    })();
+  </script>
+</body>
+</html>

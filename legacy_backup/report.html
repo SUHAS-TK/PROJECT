@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance Report – AI Viva Simulator</title>
+  <meta name="description" content="View your AI Viva Simulator performance report with detailed analytics." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <script src="js/theme.js"></script>
+</head>
+<body>
+  <canvas id="snowCanvas" aria-hidden="true"></canvas>
+
+  <nav class="navbar">
+    <div class="nav-brand">
+      <a href="dashboard.html" class="nav-back">← Dashboard</a>
+      <span class="nav-sep">|</span>
+      <span class="nav-title">Performance Report</span>
+    </div>
+    <div class="nav-links">
+      <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Light / Dark mode">
+        <span class="theme-icon">☀️</span>
+        <span class="theme-label">Theme</span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="report-container">
+
+    <!-- Score Hero -->
+    <section class="report-hero card glass-card">
+      <div class="report-score-block">
+        <div class="big-score" id="bigScore">82</div>
+        <div class="grade-badge" id="gradeBadge">A</div>
+      </div>
+      <div class="report-meta">
+        <h2 id="reportTitle">Official Performance Report</h2>
+        <p id="execSummary" class="exec-summary">Excellent performance with strong understanding of core concepts. The candidate demonstrated solid analytical thinking with particularly strong responses in system design and database architecture. Areas for improvement include distributed systems concepts and API security best practices.</p>
+        <div class="report-stats-row">
+          <div class="stat-pill glass-card">
+            <span class="stat-pill-num" id="reportQuestions">10</span>
+            <span class="stat-pill-label">Questions</span>
+          </div>
+          <div class="stat-pill glass-card">
+            <span class="stat-pill-num" id="reportCorrect" style="color:var(--success)">6</span>
+            <span class="stat-pill-label">Correct</span>
+          </div>
+          <div class="stat-pill glass-card">
+            <span class="stat-pill-num" id="reportPartial" style="color:var(--warn)">3</span>
+            <span class="stat-pill-label">Partial</span>
+          </div>
+          <div class="stat-pill glass-card">
+            <span class="stat-pill-num" id="reportIncorrect" style="color:var(--error)">1</span>
+            <span class="stat-pill-label">Incorrect</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Save Report & Send to Email Card -->
+    <section class="report-save-email-card glass-card" id="saveEmailCard">
+      <div class="save-email-header">
+        <div class="save-email-title">
+          <span>💾 Save &amp; ✉️ Send Report</span>
+        </div>
+        <span class="badge badge-info">Demo Mode</span>
+      </div>
+
+      <div class="save-email-grid">
+        <!-- Save Options -->
+        <div class="save-action-box">
+          <div class="save-box-title">
+            <span>📥 Save Offline</span>
+          </div>
+          <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.6;">
+            Save your complete assessment offline as a clean PDF or standalone HTML file.
+          </p>
+          <div class="save-btns-row">
+            <button class="btn btn-secondary btn-sm" id="printReportBtn">🖨️ Save as PDF</button>
+            <button class="btn btn-secondary btn-sm" id="downloadHtmlBtn">📄 Download HTML</button>
+            <button class="btn btn-secondary btn-sm" id="copySummaryBtn">📋 Copy Summary</button>
+            <button class="btn btn-secondary btn-sm" id="shareReportBtn">🔗 Share Report</button>
+          </div>
+        </div>
+
+        <!-- Email Options -->
+        <div class="email-action-box">
+          <div class="save-box-title">
+            <span>✉️ Send to Email Address</span>
+          </div>
+          <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.6;">
+            Send to yourself, your professor, or multiple recipients (separated by commas).
+          </p>
+          <div class="email-input-group">
+            <input
+              type="text"
+              id="reportEmailInput"
+              class="email-input"
+              placeholder="e.g. student@gmail.com, mentor@univ.edu"
+              autocomplete="email"
+            />
+            <button class="send-email-btn" id="sendEmailBtn">
+              <span id="sendEmailBtnText">Send Report</span>
+            </button>
+          </div>
+          <div class="email-status-banner success" id="emailStatusBanner" style="display:none;margin-top:0.75rem;"></div>
+          <div id="emailMailtoArea" style="margin-top:0.5rem;display:none;">
+            <a href="#" id="emailMailtoLink" class="btn btn-secondary btn-sm" target="_blank">📬 Open in Default Email Client</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Results Grid -->
+    <div class="report-grid">
+
+      <!-- Topic Performance -->
+      <div class="card report-card glass-card">
+        <h3 class="card-title">📈 Topic Performance</h3>
+        <div id="topicPerformance" class="topic-list">
+          <div class="topic-row">
+            <div class="topic-label">
+              <span class="topic-name">System Design</span>
+              <span class="topic-score">92/100</span>
+            </div>
+            <div class="topic-bar"><div class="topic-bar-fill strong" style="width:92%"></div></div>
+          </div>
+          <div class="topic-row">
+            <div class="topic-label">
+              <span class="topic-name">Database Architecture</span>
+              <span class="topic-score">88/100</span>
+            </div>
+            <div class="topic-bar"><div class="topic-bar-fill strong" style="width:88%"></div></div>
+          </div>
+          <div class="topic-row">
+            <div class="topic-label">
+              <span class="topic-name">RAG Pipeline</span>
+              <span class="topic-score">85/100</span>
+            </div>
+            <div class="topic-bar"><div class="topic-bar-fill strong" style="width:85%"></div></div>
+          </div>
+          <div class="topic-row">
+            <div class="topic-label">
+              <span class="topic-name">API Security</span>
+              <span class="topic-score">72/100</span>
+            </div>
+            <div class="topic-bar"><div class="topic-bar-fill adequate" style="width:72%"></div></div>
+          </div>
+          <div class="topic-row">
+            <div class="topic-label">
+              <span class="topic-name">Distributed Systems</span>
+              <span class="topic-score">65/100</span>
+            </div>
+            <div class="topic-bar"><div class="topic-bar-fill adequate" style="width:65%"></div></div>
+          </div>
+          <div class="topic-row">
+            <div class="topic-label">
+              <span class="topic-name">Testing Strategies</span>
+              <span class="topic-score">78/100</span>
+            </div>
+            <div class="topic-bar"><div class="topic-bar-fill adequate" style="width:78%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Strong Areas -->
+      <div class="card report-card glass-card">
+        <h3 class="card-title">💪 Strengths</h3>
+        <ul id="strongAreas" class="report-list success-list">
+          <li>Excellent understanding of system architecture and design patterns</li>
+          <li>Strong grasp of database normalization and indexing strategies</li>
+          <li>Clear articulation of RAG pipeline components and retrieval mechanisms</li>
+          <li>Good use of real-world examples and analogies</li>
+        </ul>
+      </div>
+
+      <!-- Weak Areas -->
+      <div class="card report-card glass-card">
+        <h3 class="card-title">⚠️ Areas for Improvement</h3>
+        <ul id="weakAreas" class="report-list error-list">
+          <li>Distributed transaction management needs deeper understanding</li>
+          <li>API rate limiting and security middleware concepts could be stronger</li>
+          <li>Load balancing strategies for microservices require more study</li>
+        </ul>
+      </div>
+
+      <!-- Misconceptions -->
+      <div class="card report-card glass-card">
+        <h3 class="card-title">🔁 Repeated Misconceptions</h3>
+        <ul id="misconceptions" class="report-list warn-list">
+          <li>Confused eventual consistency with strong consistency in distributed systems</li>
+          <li>Oversimplified the role of API gateways in microservices architecture</li>
+        </ul>
+      </div>
+
+      <!-- Revision Topics -->
+      <div class="card report-card glass-card">
+        <h3 class="card-title">📖 Recommended Revision</h3>
+        <ul id="revisionTopics" class="report-list info-list">
+          <li>CAP Theorem and its practical implications</li>
+          <li>OAuth 2.0 and JWT-based authentication flows</li>
+          <li>Docker containerization and Kubernetes orchestration</li>
+          <li>Message queue patterns (RabbitMQ, Kafka)</li>
+        </ul>
+      </div>
+
+      <!-- Practice Questions -->
+      <div class="card report-card full-width glass-card">
+        <h3 class="card-title">🧪 Practice Questions</h3>
+        <div id="practiceQuestions" class="practice-questions-list">
+          <div class="practice-q">
+            <div class="practice-q-text">How would you implement a circuit breaker pattern to handle cascading failures in your microservices?</div>
+            <div class="practice-q-meta">Difficulty: Hard · Targets: Distributed Systems resilience</div>
+          </div>
+          <div class="practice-q">
+            <div class="practice-q-text">Explain how you would secure your REST API endpoints against common OWASP Top 10 vulnerabilities.</div>
+            <div class="practice-q-meta">Difficulty: Medium · Targets: API Security knowledge gap</div>
+          </div>
+          <div class="practice-q">
+            <div class="practice-q-text">Describe the Saga pattern and how it manages distributed transactions without 2PC.</div>
+            <div class="practice-q-meta">Difficulty: Hard · Targets: Distributed transaction understanding</div>
+          </div>
+          <div class="practice-q">
+            <div class="practice-q-text">How does your FAISS index handle document updates and re-indexing efficiently?</div>
+            <div class="practice-q-meta">Difficulty: Medium · Targets: RAG pipeline optimization</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Examiner Comments -->
+      <div class="card report-card full-width glass-card">
+        <h3 class="card-title">🎓 Examiner's Comments</h3>
+        <div class="examiner-comment" id="examinerComment">The candidate demonstrated a commendable level of understanding across core project areas. System design responses were particularly impressive, showing genuine depth of thought. The RAG pipeline explanation showed real hands-on experience. I recommend focusing on distributed systems patterns and security best practices before the actual viva. Overall, a strong performance that reflects solid preparation and technical aptitude.</div>
+      </div>
+
+      <!-- Question Review -->
+      <div class="card report-card full-width glass-card">
+        <h3 class="card-title">📝 Question-by-Question Review</h3>
+        <div id="questionReview" class="question-review-list">
+          <div class="review-item">
+            <div class="review-item-header">
+              <span class="review-q-num">Q1</span>
+              <span class="review-q-topic">System Design</span>
+              <span class="badge badge-medium">medium</span>
+              <span class="review-q-score" style="color:var(--success)">92/100</span>
+            </div>
+            <div class="review-q-text">Explain the advantages of using a microservices architecture over a monolithic architecture for your project.</div>
+            <div class="review-a-text"><strong>Your answer:</strong> Microservices allow independent deployment, scalability per service, and technology flexibility. Trade-offs include network latency and operational complexity…</div>
+          </div>
+          <div class="review-item">
+            <div class="review-item-header">
+              <span class="review-q-num">Q2</span>
+              <span class="review-q-topic">RAG Pipeline</span>
+              <span class="badge badge-medium">medium</span>
+              <span class="review-q-score" style="color:var(--success)">88/100</span>
+            </div>
+            <div class="review-q-text">How does your RAG pipeline retrieve and rank relevant document chunks for question generation?</div>
+            <div class="review-a-text"><strong>Your answer:</strong> The system uses sentence-transformers to encode chunks into FAISS vectors. At query time, cosine similarity finds the top-k chunks…</div>
+          </div>
+          <div class="review-item">
+            <div class="review-item-header">
+              <span class="review-q-num">Q3</span>
+              <span class="review-q-topic">Database Design</span>
+              <span class="badge badge-easy">easy</span>
+              <span class="review-q-score" style="color:var(--warn)">72/100</span>
+            </div>
+            <div class="review-q-text">Why did you choose SQLite for this application instead of PostgreSQL or MySQL?</div>
+            <div class="review-a-text"><strong>Your answer:</strong> SQLite is file-based and requires no separate server process, making it ideal for single-user applications…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="report-actions">
+      <a href="index.html" class="btn btn-secondary">🏠 Back to Home</a>
+      <a href="dashboard.html" class="btn btn-secondary">📊 Dashboard</a>
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Print Report</button>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/snow.js"></script>
+  <script src="js/report.js"></script>
+  <script src="js/arc_reactor.js"></script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – Project Viva Simulator</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/futuristic.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="/static/js/theme.js"></script>
+</head>
+<body class="fui-dashboard-body">
+  <div class="holo-grid" aria-hidden="true"></div>
+  <div class="glow-orb orb-cyan" aria-hidden="true"></div>
+  <div class="glow-orb orb-purple" aria-hidden="true"></div>
+
+  <!-- ══════════════════ NAVBAR ══════════════════ -->
+  <nav class="fui-navbar" id="fuiNavbar">
+    <div class="fui-nav-brand">
+      <a href="/" style="display:flex;align-items:center;gap:0.75rem;text-decoration:none;">
+        <div class="fui-logo-icon">
+          <div class="logo-ring r1"></div>
+          <div class="logo-ring r2"></div>
+          <div class="logo-core">🎓</div>
+        </div>
+        <span class="fui-brand-text">PROJECT <span class="fui-brand-accent">VIVA</span></span>
+      </a>
+    </div>
+    <div class="fui-nav-links">
+      <a href="/" class="fui-nav-link">← Home</a>
+      <button id="themeToggleBtn" class="fui-theme-btn" title="Toggle theme">
+        <span class="theme-icon">☀️</span>
+      </button>
+      <span id="apiStatusBadge" class="fui-status-badge checking">Checking API…</span>
+    </div>
+    <button class="fui-hamburger" id="mobileMenuBtn"><span></span><span></span><span></span></button>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="fui-dash-wrapper" style="position:relative;z-index:10;">
+
+    <!-- Header -->
+    <div class="fui-dash-header">
+      <div>
+        <h1 class="fui-dash-title">⚡ MISSION CONTROL</h1>
+        <p class="fui-dash-subtitle">Upload your project and launch your AI viva examination</p>
+      </div>
+    </div>
+
+    <!-- Stats Strip -->
+    <div class="fui-stats-grid" id="dashStatsGrid">
+      <div class="fui-stat-card">
+        <div class="stat-card-icon">📁</div>
+        <div class="stat-card-label">Projects Uploaded</div>
+        <div class="stat-card-value" id="statProjects">—</div>
+        <div class="stat-card-sub">Ready to examine</div>
+      </div>
+      <div class="fui-stat-card">
+        <div class="stat-card-icon">🎓</div>
+        <div class="stat-card-label">Viva Sessions</div>
+        <div class="stat-card-value" id="statSessions">—</div>
+        <div class="stat-card-sub">Completed</div>
+      </div>
+      <div class="fui-stat-card">
+        <div class="stat-card-icon">📊</div>
+        <div class="stat-card-label">Avg Score</div>
+        <div class="stat-card-value" id="statAvgScore">—</div>
+        <div class="stat-card-sub">Across all sessions</div>
+      </div>
+      <div class="fui-stat-card">
+        <div class="stat-card-icon">🎤</div>
+        <div class="stat-card-label">Mode</div>
+        <div class="stat-card-value" style="font-size:1.2rem;">Voice+Text</div>
+        <div class="stat-card-sub">Groq Whisper STT</div>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="fui-content-grid">
+
+      <!-- Left: Upload + Projects -->
+      <div>
+
+        <!-- Upload Card -->
+        <div class="fui-card" id="uploadCard">
+          <div class="fui-card-title">📂 Upload Project Document</div>
+
+          <!-- Drop zone -->
+          <div class="fui-upload-area" id="dropZone">
+            <div class="fui-upload-icon">📄</div>
+            <div class="fui-upload-hint">Drag & drop your document here</div>
+            <div class="fui-upload-subhint">PDF, DOCX, TXT, or Markdown · Max 50 MB</div>
+            <label class="fui-btn-secondary" style="margin-top:1rem;cursor:pointer;display:inline-flex;">
+              Browse File
+              <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.md" hidden />
+            </label>
+          </div>
+
+          <!-- File selected form -->
+          <div id="uploadForm" style="display:none;margin-top:1rem;">
+
+            <!-- File preview -->
+            <div id="filePreview" style="display:flex;align-items:center;gap:1rem;padding:0.75rem 1rem;background:rgba(0,245,255,0.04);border:1px solid rgba(0,245,255,0.15);border-radius:10px;margin-bottom:1.25rem;">
+              <span style="font-size:1.5rem;">📄</span>
+              <div style="flex:1;min-width:0;">
+                <div id="fileName" style="font-weight:700;color:#f1f5f9;font-size:0.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+                <div id="fileSize" style="font-size:0.77rem;color:#64748b;margin-top:0.1rem;"></div>
+              </div>
+              <button id="clearFileBtn" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:1rem;padding:0.25rem;" title="Remove file">✕</button>
+            </div>
+
+            <!-- Project title -->
+            <div class="fui-form-group">
+              <label class="fui-form-label" for="projectTitle">Project Title</label>
+              <input type="text" id="projectTitle" class="fui-input" placeholder="e.g. Smart Library Management System" maxlength="200" />
+            </div>
+
+            <!-- Config -->
+            <div class="fui-config-grid">
+              <div class="fui-form-group">
+                <label class="fui-form-label" for="difficultySelect">Difficulty</label>
+                <select id="difficultySelect" class="fui-select">
+                  <option value="easy">Easy – Recall & Basics</option>
+                  <option value="medium" selected>Medium – Apply & Analyse</option>
+                  <option value="hard">Hard – Design & Evaluate</option>
+                </select>
+              </div>
+              <div class="fui-form-group">
+                <label class="fui-form-label" for="questionCount">Questions</label>
+                <select id="questionCount" class="fui-select">
+                  <option value="5">5 – Rapid Quiz</option>
+                  <option value="10" selected>10 – Standard</option>
+                  <option value="15">15 – In-depth</option>
+                  <option value="20">20 – Rigorous</option>
+                  <option value="25">25 – Full Defence</option>
+                  <option value="30">30 – Exhaustive</option>
+                  <option value="40">40 – Mastery</option>
+                  <option value="50">50 – Marathon</option>
+                </select>
+              </div>
+              <div class="fui-form-group">
+                <label class="fui-form-label">Mode</label>
+                <div class="fui-mode-toggle">
+                  <button class="fui-toggle-btn active" id="textModeBtn" data-mode="text">💬 Text</button>
+                  <button class="fui-toggle-btn" id="voiceModeBtn" data-mode="voice">🎤 Voice</button>
+                </div>
+              </div>
+            </div>
+
+            <button class="fui-btn-primary" id="uploadBtn" style="width:100%;justify-content:center;font-size:1rem;">
+              <span class="fui-btn-glow"></span>
+              <span class="btn-text">⚡ Process & Start Viva</span>
+              <span class="btn-spinner" style="display:none;">⏳ Processing…</span>
+            </button>
+          </div>
+
+          <!-- Processing status -->
+          <div class="fui-processing-status" id="processingStatus" style="display:none;">
+            <div class="fui-status-row">
+              <span class="fui-status-icon" id="statusIcon">⚙️</span>
+              <div>
+                <div class="fui-status-title" id="statusTitle">Processing…</div>
+                <div class="fui-status-msg" id="statusMsg"></div>
+              </div>
+            </div>
+            <div class="fui-progress-bar">
+              <div class="fui-progress-fill" id="progressFill"></div>
+            </div>
+            <div class="fui-tech-tags" id="techTags" style="margin-top:0.75rem;"></div>
+            <button class="fui-btn-primary" id="launchVivaBtn" style="display:none;margin-top:1rem;width:100%;justify-content:center;"><span class="fui-btn-glow"></span> 🚀 Launch Viva Examination</button>
+          </div>
+        </div>
+
+        <!-- Existing Projects -->
+        <div class="fui-card" id="projectsCard">
+          <div class="fui-card-title">📋 Your Projects</div>
+          <div id="projectsGrid">
+            <div style="text-align:center;padding:2rem;color:#64748b;font-size:0.875rem;">
+              No projects uploaded yet. Upload one above to get started.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Sidebar info -->
+      <div>
+
+        <!-- Quick Launch -->
+        <div class="fui-card">
+          <div class="fui-card-title">🚀 Quick Launch</div>
+          <p style="font-size:0.82rem;color:#64748b;line-height:1.7;margin-bottom:1.25rem;">
+            Select an existing project below and click <strong style="color:#f1f5f9;">Start Viva</strong> to launch a new examination session instantly.
+          </p>
+          <div class="fui-form-group">
+            <label class="fui-form-label">Select Project</label>
+            <select id="quickProjectSelect" class="fui-select">
+              <option value="">— Choose a project —</option>
+            </select>
+          </div>
+          <div class="fui-form-group">
+            <label class="fui-form-label">Difficulty</label>
+            <select id="quickDifficulty" class="fui-select">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <div class="fui-form-group">
+            <label class="fui-form-label">Questions</label>
+            <select id="quickQuestions" class="fui-select">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
+            </select>
+          </div>
+          <button id="quickLaunchBtn" class="fui-btn-primary" style="width:100%;justify-content:center;margin-top:0.5rem;">
+            <span class="fui-btn-glow"></span>
+            🎓 Start Viva Session
+          </button>
+        </div>
+
+        <!-- AI Agent -->
+        <div class="fui-card">
+          <div class="fui-card-title">🤖 Arc Reactor AI Mentor</div>
+          <p style="font-size:0.82rem;color:#64748b;line-height:1.7;margin-bottom:1rem;">
+            Ask the AI Mentor anything about your project, viva preparation, or technical concepts.
+          </p>
+          <div class="mentor-messages" id="dashMentorMessages" style="max-height:200px;overflow-y:auto;margin-bottom:0.75rem;display:flex;flex-direction:column;gap:0.5rem;">
+            <div class="mentor-msg bot">
+              <div class="msg-content">Hi! Upload your project and I'll help you prepare for your viva. Ask me anything! 🧠</div>
+            </div>
+          </div>
+          <div class="fui-mentor-input-row" style="display:flex;gap:0.5rem;">
+            <input type="text" id="dashMentorInput" class="fui-input" placeholder="Ask about your project…" style="font-size:0.85rem;padding:0.6rem 0.9rem;" />
+            <button id="dashMentorSend" class="mentor-send-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="fui-card">
+          <div class="fui-card-title">💡 Pro Tips</div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div style="display:flex;gap:0.6rem;font-size:0.8rem;">
+              <span>🧠</span>
+              <span style="color:#94a3b8;line-height:1.6;">Upload a detailed document (objectives, architecture, results) for the most targeted questions.</span>
+            </div>
+            <div style="display:flex;gap:0.6rem;font-size:0.8rem;">
+              <span>🎤</span>
+              <span style="color:#94a3b8;line-height:1.6;">Enable Voice Mode to practice speaking your answers aloud — just like a real viva!</span>
+            </div>
+            <div style="display:flex;gap:0.6rem;font-size:0.8rem;">
+              <span>📈</span>
+              <span style="color:#94a3b8;line-height:1.6;">Start with Easy difficulty to identify knowledge gaps, then advance to Hard.</span>
+            </div>
+            <div style="display:flex;gap:0.6rem;font-size:0.8rem;">
+              <span>📧</span>
+              <span style="color:#94a3b8;line-height:1.6;">Email your performance report to your professor after each session.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- AI Mentor Floating Button -->
+  <div class="fui-mentor-fab" id="mentorFab" title="AI Project Mentor">
+    <div class="fab-ring"></div>
+    <span class="fab-icon">🤖</span>
+    <span class="fab-label">AI Mentor</span>
+  </div>
+
+  <!-- AI Mentor Chat Panel -->
+  <div class="fui-mentor-panel" id="mentorPanel">
+    <div class="mentor-panel-header">
+      <div class="mentor-avatar">
+        <div class="logo-ring r1"></div>
+        <div class="logo-core">🧠</div>
+      </div>
+      <div>
+        <div class="mentor-name">Arc Reactor AI</div>
+        <div class="mentor-status"><span class="status-dot"></span> Online</div>
+      </div>
+      <button class="mentor-close" id="mentorClose">✕</button>
+    </div>
+    <div class="mentor-messages" id="mentorMessages">
+      <div class="mentor-msg bot">
+        <div class="msg-content">Hello! I'm your AI Project Mentor. Ask me anything about viva preparation or your project! 🧠</div>
+      </div>
+    </div>
+    <div class="mentor-input-row">
+      <input type="text" id="mentorInput" placeholder="Ask anything about your viva…" />
+      <button id="mentorSendBtn" class="mentor-send-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/arc_reactor.js"></script>
+  <script>
+    // Additional dashboard enhancements
+    (function() {
+      // Status badge
+      const badge = document.getElementById('apiStatusBadge');
+      if (badge) {
+        fetch('/api/projects').then(r => {
+          badge.textContent = r.ok ? '✓ AI Online' : '⚠ API Error';
+          badge.className = 'fui-status-badge ' + (r.ok ? 'online' : 'error');
+        }).catch(() => {
+          badge.textContent = '⚠ Offline';
+          badge.className = 'fui-status-badge error';
+        });
+      }
+
+      // Quick launch button
+      const quickBtn = document.getElementById('quickLaunchBtn');
+      const quickSelect = document.getElementById('quickProjectSelect');
+      if (quickBtn && quickSelect) {
+        quickBtn.addEventListener('click', async () => {
+          const projectId = quickSelect.value;
+          if (!projectId) {
+            showFuiToast('Please select a project first.', 'error');
+            return;
+          }
+          const difficulty = document.getElementById('quickDifficulty').value;
+          const questions = parseInt(document.getElementById('quickQuestions').value);
+
+          quickBtn.disabled = true;
+          quickBtn.querySelector('.btn-text') && (quickBtn.querySelector('.btn-text').textContent = '⏳ Launching…');
+
+          try {
+            const r = await fetch('/api/sessions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ project_id: parseInt(projectId), difficulty, total_questions: questions })
+            });
+            const data = await r.json();
+            if (r.ok && data.session) {
+              window.location.href = '/viva/' + data.session.id;
+            } else {
+              showFuiToast(data.error || 'Failed to create session.', 'error');
+              quickBtn.disabled = false;
+            }
+          } catch (e) {
+            showFuiToast('Network error. Please try again.', 'error');
+            quickBtn.disabled = false;
+          }
+        });
+      }
+
+      // Mobile menu
+      const hamburger = document.getElementById('mobileMenuBtn');
+      const navLinks = document.querySelector('.fui-nav-links');
+      if (hamburger && navLinks) {
+        hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
+      }
+
+      // Theme toggle
+      const themeBtn = document.getElementById('themeToggleBtn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+          const curr = document.documentElement.getAttribute('data-theme') || 'dark';
+          const next = curr === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('viva-theme', next);
+          const icon = themeBtn.querySelector('.theme-icon');
+          if (icon) icon.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+      }
+
+      function showFuiToast(msg, type = 'info') {
+        const t = document.createElement('div');
+        t.className = `fui-toast ${type}`;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        requestAnimationFrame(() => t.classList.add('show'));
+        setTimeout(() => {
+          t.classList.remove('show');
+          setTimeout(() => t.remove(), 400);
+        }, 3500);
+      }
+
+      window.showFuiToast = showFuiToast;
+    })();
+  </script>
+</body>
+</html>

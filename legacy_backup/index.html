@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Viva Simulator – Arc Reactor Powered</title>
+  <meta name="description" content="AI-powered Viva Voce Examination Simulator with Arc Reactor AI Agent, voice support, adaptive difficulty, and detailed performance reports." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <script src="js/theme.js"></script>
+</head>
+<body class="welcome-body">
+
+  <!-- ══════════ SNOWFALL CANVAS ══════════ -->
+  <canvas id="snowCanvas" aria-hidden="true"></canvas>
+
+  <!-- ══════════ AURORA BACKGROUND ══════════ -->
+  <div class="aurora-bg" aria-hidden="true">
+    <div class="aurora-wave aurora-1"></div>
+    <div class="aurora-wave aurora-2"></div>
+    <div class="aurora-wave aurora-3"></div>
+  </div>
+
+  <!-- Animated background particles -->
+  <div class="welcome-bg-grid" aria-hidden="true"></div>
+  <div class="welcome-glow-orb orb-1" aria-hidden="true"></div>
+  <div class="welcome-glow-orb orb-2" aria-hidden="true"></div>
+  <div class="welcome-glow-orb orb-3" aria-hidden="true"></div>
+
+  <!-- Floating particles -->
+  <div class="floating-particles" id="floatingParticles" aria-hidden="true"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="nav-icon">⚡</span>
+      <span class="nav-title">Arc Reactor AI</span>
+    </div>
+    <div class="nav-links">
+      <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Light / Dark mode">
+        <span class="theme-icon">☀️</span>
+        <span class="theme-label">Light</span>
+      </button>
+      <a href="dashboard.html" class="btn btn-secondary btn-sm">Dashboard →</a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════ HERO ═══════════════════════ -->
+  <section class="wlc-hero">
+    <div class="wlc-hero-inner">
+
+      <!-- Arc Reactor Icon -->
+      <div class="arc-reactor-badge" id="arcReactorBadge" title="Arc Reactor AI Agent">
+        <div class="arc-ring arc-ring-1"></div>
+        <div class="arc-ring arc-ring-2"></div>
+        <div class="arc-ring arc-ring-3"></div>
+        <div class="arc-core">⚡</div>
+      </div>
+
+      <div class="wlc-tag">Powered by Groq &amp; LLaMA 3 · Whisper STT</div>
+
+      <h1 class="wlc-title">
+        AI <span class="gradient-text">Viva Voce</span><br/>Simulator
+      </h1>
+
+      <p class="wlc-subtitle">
+        Upload your project document and face a rigorous AI examiner that asks
+        real viva questions, evaluates your answers in depth, and delivers a
+        detailed performance report — with voice support.
+      </p>
+
+      <div class="wlc-cta-row">
+        <a href="dashboard.html" class="btn btn-primary wlc-cta-btn pulse-glow">
+          🚀 Start Your Viva
+        </a>
+        <button class="btn btn-secondary wlc-cta-btn" id="howItWorksBtn">
+          📖 How It Works
+        </button>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div class="scroll-indicator" id="scrollIndicator">
+        <div class="scroll-mouse">
+          <div class="scroll-wheel"></div>
+        </div>
+        <span>Scroll Down</span>
+      </div>
+
+      <!-- Quick Stats Strip -->
+      <div class="wlc-stats-strip glass-card">
+        <div class="wlc-stat">
+          <span class="wlc-stat-num counter" data-target="50">0</span>
+          <span class="wlc-stat-label">Max Questions</span>
+        </div>
+        <div class="wlc-stat-div"></div>
+        <div class="wlc-stat">
+          <span class="wlc-stat-num counter" data-target="3">0</span>
+          <span class="wlc-stat-label">Difficulty Levels</span>
+        </div>
+        <div class="wlc-stat-div"></div>
+        <div class="wlc-stat">
+          <span class="wlc-stat-num">🎤</span>
+          <span class="wlc-stat-label">Voice Mode</span>
+        </div>
+        <div class="wlc-stat-div"></div>
+        <div class="wlc-stat">
+          <span class="wlc-stat-num">📧</span>
+          <span class="wlc-stat-label">Email Report</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ HOW IT WORKS ═══════════════════ -->
+  <section class="wlc-section" id="howItWorksSection">
+    <div class="wlc-section-inner">
+      <h2 class="wlc-section-title reveal-on-scroll">How It Works</h2>
+      <p class="wlc-section-sub reveal-on-scroll">Three simple steps from upload to report</p>
+
+      <div class="wlc-steps">
+        <!-- Step 1 -->
+        <div class="wlc-step-card reveal-on-scroll glass-card">
+          <div class="wlc-step-num">01</div>
+          <div class="wlc-step-icon">📂</div>
+          <h3 class="wlc-step-title">Upload Your Project</h3>
+          <p class="wlc-step-desc">
+            Upload your project report, thesis, or documentation in
+            <strong>PDF, DOCX, TXT, or Markdown</strong> format.
+            The AI ingests and indexes every section automatically.
+          </p>
+        </div>
+
+        <div class="wlc-step-connector reveal-on-scroll">→</div>
+
+        <!-- Step 2 -->
+        <div class="wlc-step-card reveal-on-scroll glass-card">
+          <div class="wlc-step-num">02</div>
+          <div class="wlc-step-icon">🤖</div>
+          <h3 class="wlc-step-title">Face the AI Examiner</h3>
+          <p class="wlc-step-desc">
+            The <strong>Arc Reactor AI Agent</strong> asks topic-specific questions
+            tailored to your document — by voice or text.
+            Each answer is evaluated against rubric criteria in real time.
+          </p>
+        </div>
+
+        <div class="wlc-step-connector reveal-on-scroll">→</div>
+
+        <!-- Step 3 -->
+        <div class="wlc-step-card reveal-on-scroll glass-card">
+          <div class="wlc-step-num">03</div>
+          <div class="wlc-step-icon">📊</div>
+          <h3 class="wlc-step-title">Get Your Report</h3>
+          <p class="wlc-step-desc">
+            Receive a detailed <strong>performance report</strong> with a score,
+            grade, topic-level breakdown, strengths, weaknesses, and practice questions.
+            Save it or email it to anyone.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ FEATURE GRID ═══════════════════ -->
+  <section class="wlc-section wlc-section-alt">
+    <div class="wlc-section-inner">
+      <h2 class="wlc-section-title reveal-on-scroll">Everything You Need</h2>
+      <p class="wlc-section-sub reveal-on-scroll">Built for students, researchers, and professionals</p>
+
+      <div class="wlc-features-grid">
+
+        <div class="wlc-feature-card reveal-on-scroll glass-card">
+          <div class="wlc-feature-icon">🧠</div>
+          <h4 class="wlc-feature-title">AI-Powered Questions</h4>
+          <p class="wlc-feature-desc">Questions are generated from <em>your</em> document, not generic templates — covering every topic and concept in your project.</p>
+        </div>
+
+        <div class="wlc-feature-card reveal-on-scroll glass-card">
+          <div class="wlc-feature-icon">🎤</div>
+          <h4 class="wlc-feature-title">Full Voice Mode</h4>
+          <p class="wlc-feature-desc">Hear questions spoken aloud and answer by voice via Whisper speech-to-text. A true hands-free viva experience.</p>
+        </div>
+
+        <div class="wlc-feature-card reveal-on-scroll glass-card">
+          <div class="wlc-feature-icon">📈</div>
+          <h4 class="wlc-feature-title">Topic-Level Analytics</h4>
+          <p class="wlc-feature-desc">See exactly which topics you excelled in and which need revision — with bar charts and colour-coded performance indicators.</p>
+        </div>
+
+        <div class="wlc-feature-card reveal-on-scroll glass-card">
+          <div class="wlc-feature-icon">🎯</div>
+          <h4 class="wlc-feature-title">Adaptive Difficulty</h4>
+          <p class="wlc-feature-desc">Choose Easy, Medium, or Hard. The examiner adapts depth and complexity from basic recall up to design-level critique.</p>
+        </div>
+
+        <div class="wlc-feature-card reveal-on-scroll glass-card">
+          <div class="wlc-feature-icon">⏹️</div>
+          <h4 class="wlc-feature-title">Finish Early Option</h4>
+          <p class="wlc-feature-desc">End the session at any point and immediately receive a performance report based on the questions you've answered so far.</p>
+        </div>
+
+        <div class="wlc-feature-card reveal-on-scroll glass-card">
+          <div class="wlc-feature-icon">✉️</div>
+          <h4 class="wlc-feature-title">Email to Anyone</h4>
+          <p class="wlc-feature-desc">Send the HTML report to yourself, your professor, mentor, or multiple recipients — comma-separated. Voice-dictate the address too.</p>
+        </div>
+
+        <div class="wlc-feature-card reveal-on-scroll glass-card">
+          <div class="wlc-feature-icon">🌗</div>
+          <h4 class="wlc-feature-title">Light &amp; Dark Mode</h4>
+          <p class="wlc-feature-desc">Switch between a sleek dark cyber theme and a clean light theme. Your preference is saved across sessions automatically.</p>
+        </div>
+
+        <div class="wlc-feature-card reveal-on-scroll glass-card">
+          <div class="wlc-feature-icon">🤖</div>
+          <h4 class="wlc-feature-title">Arc Reactor AI Agent</h4>
+          <p class="wlc-feature-desc">Ask the built-in AI assistant any question about your project, the viva process, or exam preparation — available on every page.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ TECH STACK ═══════════════════ -->
+  <section class="wlc-section">
+    <div class="wlc-section-inner">
+      <h2 class="wlc-section-title reveal-on-scroll">Technology Stack</h2>
+      <p class="wlc-section-sub reveal-on-scroll">Powered by cutting-edge AI &amp; modern web technologies</p>
+
+      <div class="tech-stack-grid">
+        <div class="tech-card reveal-on-scroll glass-card">
+          <div class="tech-card-icon">🐍</div>
+          <h4>Python 3.11+ &amp; Flask</h4>
+          <p>Robust backend API with Flask 3.x</p>
+        </div>
+        <div class="tech-card reveal-on-scroll glass-card">
+          <div class="tech-card-icon">🤖</div>
+          <h4>Groq LLaMA 3.3 70B</h4>
+          <p>State-of-the-art LLM for question generation</p>
+        </div>
+        <div class="tech-card reveal-on-scroll glass-card">
+          <div class="tech-card-icon">🎙️</div>
+          <h4>Whisper Large v3</h4>
+          <p>Advanced speech-to-text via Groq API</p>
+        </div>
+        <div class="tech-card reveal-on-scroll glass-card">
+          <div class="tech-card-icon">🔍</div>
+          <h4>RAG + FAISS</h4>
+          <p>Sentence-transformers for document-grounded Q&amp;A</p>
+        </div>
+        <div class="tech-card reveal-on-scroll glass-card">
+          <div class="tech-card-icon">🗄️</div>
+          <h4>SQLite + SQLAlchemy</h4>
+          <p>Lightweight database for sessions &amp; projects</p>
+        </div>
+        <div class="tech-card reveal-on-scroll glass-card">
+          <div class="tech-card-icon">🌐</div>
+          <h4>Vanilla HTML/CSS/JS</h4>
+          <p>Premium frontend with Arc Reactor HUD</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ SUPPORTED FORMATS ═══════════════════ -->
+  <section class="wlc-section wlc-section-alt">
+    <div class="wlc-section-inner wlc-formats-row">
+      <div class="wlc-formats-left reveal-on-scroll">
+        <h2 class="wlc-section-title" style="text-align:left">Supported File Formats</h2>
+        <p class="wlc-section-sub" style="text-align:left;margin-bottom:1.5rem">
+          Upload any standard document format up to <strong>50 MB</strong>.
+          The AI reads and indexes all text, headings, code blocks, and tables.
+        </p>
+        <div class="wlc-format-list">
+          <div class="wlc-format-item"><span class="wlc-format-badge">PDF</span>Research papers, project reports, theses</div>
+          <div class="wlc-format-item"><span class="wlc-format-badge">DOCX</span>Word documents, project documentation</div>
+          <div class="wlc-format-item"><span class="wlc-format-badge">TXT</span>Plain text, README files</div>
+          <div class="wlc-format-item"><span class="wlc-format-badge">MD</span>Markdown documentation, GitHub READMEs</div>
+        </div>
+      </div>
+      <div class="wlc-formats-right reveal-on-scroll">
+        <div class="wlc-tip-box glass-card">
+          <div class="wlc-tip-icon">💡</div>
+          <div>
+            <strong>Pro Tip</strong><br/>
+            For the best results, upload a document that includes your project's
+            <em>objectives, methodology, system design, results, and conclusions</em>.
+            The richer the document, the more targeted and challenging the questions.
+          </div>
+        </div>
+        <div class="wlc-tip-box glass-card" style="margin-top:1rem;">
+          <div class="wlc-tip-icon">🎓</div>
+          <div>
+            <strong>Used for</strong><br/>
+            Final year projects · Thesis defence · Research presentations ·
+            Technical interviews · Seminar preparation
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ DEMO PREVIEW ═══════════════════════ -->
+  <section class="wlc-section">
+    <div class="wlc-section-inner">
+      <h2 class="wlc-section-title reveal-on-scroll">Live Demo Preview</h2>
+      <p class="wlc-section-sub reveal-on-scroll">See what a viva session looks like</p>
+
+      <div class="demo-preview-card glass-card reveal-on-scroll">
+        <div class="demo-header">
+          <div class="demo-dots">
+            <span class="demo-dot red"></span>
+            <span class="demo-dot yellow"></span>
+            <span class="demo-dot green"></span>
+          </div>
+          <span class="demo-title">AI Viva Session — Live Examination</span>
+        </div>
+        <div class="demo-body">
+          <div class="demo-question-area">
+            <div class="demo-topic">SYSTEM DESIGN</div>
+            <div class="demo-question" id="demoQuestion">Explain the advantages of using a microservices architecture over a monolithic architecture for your project, and discuss the trade-offs you considered.</div>
+            <div class="demo-typing-indicator" id="demoTyping">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="demo-answer-area">
+            <div class="demo-score-ring">
+              <svg viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8" />
+                <circle cx="40" cy="40" r="32" fill="none" stroke="url(#demoGrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="40" style="transform:rotate(-90deg);transform-origin:center;" />
+                <defs><linearGradient id="demoGrad"><stop offset="0%" stop-color="#00e5ff"/><stop offset="100%" stop-color="#4f6ef7"/></linearGradient></defs>
+              </svg>
+              <div class="demo-score-label">
+                <span class="demo-score-num">82</span>
+                <span class="demo-score-sub">avg score</span>
+              </div>
+            </div>
+            <div class="demo-stats">
+              <div class="demo-stat"><span class="demo-stat-val correct-color">5</span><span>Correct</span></div>
+              <div class="demo-stat"><span class="demo-stat-val partial-color">2</span><span>Partial</span></div>
+              <div class="demo-stat"><span class="demo-stat-val incorrect-color">1</span><span>Incorrect</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ FINAL CTA ═══════════════════════ -->
+  <section class="wlc-cta-section">
+    <div class="wlc-cta-inner reveal-on-scroll">
+      <div class="arc-reactor-badge arc-reactor-sm" aria-hidden="true">
+        <div class="arc-ring arc-ring-1"></div>
+        <div class="arc-ring arc-ring-2"></div>
+        <div class="arc-core">⚡</div>
+      </div>
+      <h2 class="wlc-cta-title">Ready to Ace Your Viva?</h2>
+      <p class="wlc-cta-sub">Upload your project and start a practice session in under 60 seconds.</p>
+      <a href="dashboard.html" class="btn btn-primary wlc-cta-btn pulse-glow">
+        ⚡ Launch Simulator
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="wlc-footer">
+    <span>AI Viva Simulator · Arc Reactor AI Agent</span>
+    <span class="wlc-footer-sep">·</span>
+    <span>Built with Flask, Groq &amp; Whisper</span>
+    <span class="wlc-footer-sep">·</span>
+    <span>&copy; 2026 SIC Project</span>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Snowfall + Effects Script -->
+  <script src="js/snow.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/arc_reactor.js"></script>
+
+  <script>
+    // Smooth scroll to "How It Works" section
+    document.getElementById("howItWorksBtn").addEventListener("click", () => {
+      document.getElementById("howItWorksSection").scrollIntoView({ behavior: "smooth" });
+    });
+
+    // Arc Reactor subtle pulse click
+    document.getElementById("arcReactorBadge").addEventListener("click", () => {
+      const badge = document.getElementById("arcReactorBadge");
+      badge.classList.add("arc-pulse-burst");
+      setTimeout(() => badge.classList.remove("arc-pulse-burst"), 700);
+    });
+  </script>
+</body>
+</html>

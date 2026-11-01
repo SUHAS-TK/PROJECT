@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Viva Simulator – AI Examination Platform</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/futuristic.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="/static/js/theme.js"></script>
+</head>
+<body class="futuristic-body">
+
+  <!-- 3D Canvas Background -->
+  <canvas id="threeCanvas" class="three-canvas"></canvas>
+
+  <!-- Particle field overlay -->
+  <div class="particle-field" id="particleField"></div>
+
+  <!-- Grid overlay -->
+  <div class="holo-grid" aria-hidden="true"></div>
+
+  <!-- Glow orbs -->
+  <div class="glow-orb orb-cyan" aria-hidden="true"></div>
+  <div class="glow-orb orb-purple" aria-hidden="true"></div>
+  <div class="glow-orb orb-blue" aria-hidden="true"></div>
+
+  <!-- ══════════════════ NAVBAR ══════════════════ -->
+  <nav class="fui-navbar" id="fuiNavbar">
+    <div class="fui-nav-brand">
+      <div class="fui-logo-icon">
+        <div class="logo-ring r1"></div>
+        <div class="logo-ring r2"></div>
+        <div class="logo-core">⚡</div>
+      </div>
+      <span class="fui-brand-text">PROJECT <span class="fui-brand-accent">VIVA</span></span>
+    </div>
+    <div class="fui-nav-links">
+      <a href="/dashboard" class="fui-nav-link">Dashboard</a>
+      <button id="themeToggleBtn" class="fui-theme-btn" title="Toggle theme">
+        <span class="theme-icon">☀️</span>
+      </button>
+      <a href="/dashboard" class="fui-cta-nav-btn">
+        <span>Launch</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <!-- Mobile hamburger -->
+    <button class="fui-hamburger" id="mobileMenuBtn" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ══════════════════ HERO ══════════════════ -->
+  <section class="fui-hero" id="heroSection">
+    <div class="fui-hero-left" id="heroLeft">
+      <div class="fui-hero-tag">
+        <span class="tag-dot"></span>
+        Powered by Groq · LLaMA 3.3 · Whisper STT · FAISS RAG
+      </div>
+
+      <h1 class="fui-hero-title" id="heroTitle">
+        <span class="fui-title-line line1">PROJECT</span>
+        <span class="fui-title-line line2">VIVA <span class="fui-title-glow">SIMULATOR</span></span>
+      </h1>
+
+      <p class="fui-hero-subtitle" id="heroSubtitle">
+        Your Personal AI Examiner.<br/>
+        <span class="fui-subtitle-accent">Prepare. Practise. Defend.</span>
+      </p>
+
+      <div class="fui-hero-btns" id="heroBtns">
+        <a href="/dashboard" class="fui-btn-primary">
+          <span class="fui-btn-glow"></span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start Your Viva
+        </a>
+        <button class="fui-btn-secondary" id="exploreFeaturesBtn">
+          Explore Features
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <a href="/dashboard" class="fui-btn-outline">
+          Upload Project
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        </a>
+      </div>
+
+      <!-- Animated Stats -->
+      <div class="fui-stats-row" id="statsRow">
+        <div class="fui-stat-item">
+          <span class="fui-stat-num" data-target="50">0</span>
+          <span class="fui-stat-label">Max Questions</span>
+        </div>
+        <div class="fui-stat-div"></div>
+        <div class="fui-stat-item">
+          <span class="fui-stat-num" data-target="3">0</span>
+          <span class="fui-stat-label">Difficulty Levels</span>
+        </div>
+        <div class="fui-stat-div"></div>
+        <div class="fui-stat-item">
+          <span class="fui-stat-num" data-target="100">0</span>
+          <span class="fui-stat-label">AI Scoring</span>
+        </div>
+        <div class="fui-stat-div"></div>
+        <div class="fui-stat-item">
+          <span class="fui-stat-num" data-target="4">0</span>
+          <span class="fui-stat-label">File Formats</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3D Brain Visual -->
+    <div class="fui-hero-right" id="heroRight">
+      <div class="fui-brain-container" id="brainContainer">
+        <!-- Real 3D Three.js Holographic Brain Canvas -->
+        <canvas id="brainCanvas" class="brain-3d-canvas"></canvas>
+        <div class="brain-ring ring-outer"></div>
+        <div class="brain-ring ring-mid"></div>
+        <div class="brain-ring ring-inner"></div>
+
+        <!-- Floating data nodes -->
+        <div class="brain-node n1" style="--angle:0deg">AI</div>
+        <div class="brain-node n2" style="--angle:60deg">RAG</div>
+        <div class="brain-node n3" style="--angle:120deg">STT</div>
+        <div class="brain-node n4" style="--angle:180deg">LLM</div>
+        <div class="brain-node n5" style="--angle:240deg">TTS</div>
+        <div class="brain-node n6" style="--angle:300deg">NLP</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scroll indicator -->
+  <div class="fui-scroll-indicator" id="scrollIndicator">
+    <span>Scroll to explore</span>
+    <div class="scroll-arrow"></div>
+  </div>
+
+  <!-- ══════════════════ FEATURES ══════════════════ -->
+  <section class="fui-section" id="featuresSection">
+    <div class="fui-section-inner">
+      <div class="fui-section-header">
+        <div class="fui-section-tag">CAPABILITIES</div>
+        <h2 class="fui-section-title">Everything You Need to Excel</h2>
+        <p class="fui-section-sub">A complete AI-powered viva preparation ecosystem</p>
+      </div>
+
+      <div class="fui-features-grid">
+        <div class="fui-feature-card" data-delay="0">
+          <div class="fui-feature-icon-wrap">
+            <span class="fui-feature-icon">🧠</span>
+          </div>
+          <h3 class="fui-feature-title">AI-Powered Questions</h3>
+          <p class="fui-feature-desc">Questions generated from your specific project document using FAISS vector retrieval and LLaMA 3.3 LLM.</p>
+          <div class="fui-feature-tag">RAG + LLM</div>
+        </div>
+
+        <div class="fui-feature-card" data-delay="100">
+          <div class="fui-feature-icon-wrap">
+            <span class="fui-feature-icon">🎤</span>
+          </div>
+          <h3 class="fui-feature-title">Voice Viva Mode</h3>
+          <p class="fui-feature-desc">Speak your answers aloud. Groq Whisper transcribes your voice in real time. Truly hands-free examination.</p>
+          <div class="fui-feature-tag">Groq Whisper</div>
+        </div>
+
+        <div class="fui-feature-card" data-delay="200">
+          <div class="fui-feature-icon-wrap">
+            <span class="fui-feature-icon">🤖</span>
+          </div>
+          <h3 class="fui-feature-title">3D AI Examiner</h3>
+          <p class="fui-feature-desc">An animated virtual examiner with multiple personalities — Friendly Professor, Strict Examiner, Technical Expert.</p>
+          <div class="fui-feature-tag">GSAP Animated</div>
+        </div>
+
+        <div class="fui-feature-card" data-delay="300">
+          <div class="fui-feature-icon-wrap">
+            <span class="fui-feature-icon">📈</span>
+          </div>
+          <h3 class="fui-feature-title">Deep Analytics</h3>
+          <p class="fui-feature-desc">Radar charts, topic breakdown, knowledge gap analysis, and comprehensive performance reports with PDF export.</p>
+          <div class="fui-feature-tag">Chart.js</div>
+        </div>
+
+        <div class="fui-feature-card" data-delay="400">
+          <div class="fui-feature-icon-wrap">
+            <span class="fui-feature-icon">⚡</span>
+          </div>
+          <h3 class="fui-feature-title">Adaptive Difficulty</h3>
+          <p class="fui-feature-desc">The AI dynamically adjusts question difficulty based on your performance — Easy, Medium, Hard, and everything in between.</p>
+          <div class="fui-feature-tag">Adaptive AI</div>
+        </div>
+
+        <div class="fui-feature-card" data-delay="500">
+          <div class="fui-feature-icon-wrap">
+            <span class="fui-feature-icon">🔥</span>
+          </div>
+          <h3 class="fui-feature-title">Rapid Fire Mode</h3>
+          <p class="fui-feature-desc">10 quick questions with a timer. Perfect for last-minute revision and building speed under pressure.</p>
+          <div class="fui-feature-tag">Timed</div>
+        </div>
+
+        <div class="fui-feature-card" data-delay="600">
+          <div class="fui-feature-icon-wrap">
+            <span class="fui-feature-icon">🛡️</span>
+          </div>
+          <h3 class="fui-feature-title">Project Defence Mode</h3>
+          <p class="fui-feature-desc">Defend every architectural decision. The AI challenges you on technology choices, scalability, and failure scenarios.</p>
+          <div class="fui-feature-tag">Advanced</div>
+        </div>
+
+        <div class="fui-feature-card" data-delay="700">
+          <div class="fui-feature-icon-wrap">
+            <span class="fui-feature-icon">📧</span>
+          </div>
+          <h3 class="fui-feature-title">Email Reports</h3>
+          <p class="fui-feature-desc">Send your full performance report to yourself, professors, or mentors. HTML email with SMTP integration.</p>
+          <div class="fui-feature-tag">SMTP</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ HOW IT WORKS ══════════════════ -->
+  <section class="fui-section fui-section-alt" id="howItWorksSection">
+    <div class="fui-section-inner">
+      <div class="fui-section-header">
+        <div class="fui-section-tag">WORKFLOW</div>
+        <h2 class="fui-section-title">Your Viva Journey</h2>
+        <p class="fui-section-sub">From upload to performance report in minutes</p>
+      </div>
+
+      <div class="fui-journey">
+        <div class="fui-journey-step">
+          <div class="fui-step-num">01</div>
+          <div class="fui-step-icon">📂</div>
+          <div class="fui-step-content">
+            <h3>Upload Project</h3>
+            <p>Upload PDF, DOCX, TXT, or Markdown. AI parses and indexes your content into a FAISS vector store.</p>
+          </div>
+          <div class="fui-step-arrow">→</div>
+        </div>
+        <div class="fui-journey-step">
+          <div class="fui-step-num">02</div>
+          <div class="fui-step-icon">⚙️</div>
+          <div class="fui-step-content">
+            <h3>AI Analysis</h3>
+            <p>The system identifies your project's architecture, technologies, modules, and key concepts.</p>
+          </div>
+          <div class="fui-step-arrow">→</div>
+        </div>
+        <div class="fui-journey-step">
+          <div class="fui-step-num">03</div>
+          <div class="fui-step-icon">🎓</div>
+          <div class="fui-step-content">
+            <h3>Face the Examiner</h3>
+            <p>The 3D AI Examiner asks progressive questions. Answer by voice or text. Get real-time evaluation.</p>
+          </div>
+          <div class="fui-step-arrow">→</div>
+        </div>
+        <div class="fui-journey-step">
+          <div class="fui-step-num">04</div>
+          <div class="fui-step-icon">📊</div>
+          <div class="fui-step-content">
+            <h3>Performance Report</h3>
+            <p>Receive a comprehensive report with scores, knowledge gaps, and personalised improvement plan.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ EXAMINER MODES ══════════════════ -->
+  <section class="fui-section">
+    <div class="fui-section-inner">
+      <div class="fui-section-header">
+        <div class="fui-section-tag">EXAM MODES</div>
+        <h2 class="fui-section-title">Choose Your Challenge</h2>
+        <p class="fui-section-sub">Multiple examination modes for every learning goal</p>
+      </div>
+
+      <div class="fui-modes-grid">
+        <div class="fui-mode-card mode-beginner">
+          <div class="mode-level">BEGINNER</div>
+          <h3>Recall & Basics</h3>
+          <ul>
+            <li>Basic definitions</li>
+            <li>Project introduction</li>
+            <li>Technology identification</li>
+            <li>Core concept recall</li>
+          </ul>
+          <a href="/dashboard" class="fui-mode-btn">Start Easy</a>
+        </div>
+        <div class="fui-mode-card mode-intermediate featured-mode">
+          <div class="mode-badge">POPULAR</div>
+          <div class="mode-level">INTERMEDIATE</div>
+          <h3>Apply & Analyse</h3>
+          <ul>
+            <li>Architecture explanations</li>
+            <li>Implementation decisions</li>
+            <li>Database & API questions</li>
+            <li>Technical reasoning</li>
+          </ul>
+          <a href="/dashboard" class="fui-mode-btn mode-btn-primary">Start Medium</a>
+        </div>
+        <div class="fui-mode-card mode-advanced">
+          <div class="mode-level">ADVANCED</div>
+          <h3>Design & Defend</h3>
+          <ul>
+            <li>System design challenges</li>
+            <li>Failure scenario analysis</li>
+            <li>Security considerations</li>
+            <li>Performance optimisation</li>
+          </ul>
+          <a href="/dashboard" class="fui-mode-btn">Start Hard</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ SUPPORTED FORMATS ══════════════════ -->
+  <section class="fui-section fui-section-alt">
+    <div class="fui-section-inner">
+      <div class="fui-formats-row">
+        <div class="fui-formats-left">
+          <div class="fui-section-tag">DOCUMENT SUPPORT</div>
+          <h2 class="fui-section-title" style="text-align:left">Supported File Formats</h2>
+          <p class="fui-section-sub" style="text-align:left">Upload any standard academic document up to 50 MB</p>
+          <div class="fui-format-list">
+            <div class="fui-format-item">
+              <span class="fui-format-badge pdf">PDF</span>
+              <div>
+                <strong>PDF Documents</strong>
+                <span>Research papers, project reports, theses</span>
+              </div>
+            </div>
+            <div class="fui-format-item">
+              <span class="fui-format-badge docx">DOCX</span>
+              <div>
+                <strong>Word Documents</strong>
+                <span>Project documentation, academic papers</span>
+              </div>
+            </div>
+            <div class="fui-format-item">
+              <span class="fui-format-badge txt">TXT</span>
+              <div>
+                <strong>Plain Text</strong>
+                <span>README files, plain documentation</span>
+              </div>
+            </div>
+            <div class="fui-format-item">
+              <span class="fui-format-badge md">MD</span>
+              <div>
+                <strong>Markdown</strong>
+                <span>GitHub READMEs, technical documentation</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="fui-formats-right">
+          <div class="fui-tip-card">
+            <div class="fui-tip-icon">💡</div>
+            <div>
+              <strong>Pro Tip</strong>
+              <p>For the best results, upload a document that includes your project's objectives, methodology, system design, results, and conclusions. The richer the document, the more targeted the questions.</p>
+            </div>
+          </div>
+          <div class="fui-tip-card" style="margin-top:1rem">
+            <div class="fui-tip-icon">🎓</div>
+            <div>
+              <strong>Perfect For</strong>
+              <p>Final year projects · Thesis defence · Research presentations · Technical interviews · Seminar preparation</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ FINAL CTA ══════════════════ -->
+  <section class="fui-cta-section">
+    <div class="fui-cta-inner">
+      <div class="fui-cta-logo">
+        <div class="logo-ring r1"></div>
+        <div class="logo-ring r2"></div>
+        <div class="logo-core">⚡</div>
+      </div>
+      <h2 class="fui-cta-title">Ready to Ace Your Viva?</h2>
+      <p class="fui-cta-sub">Upload your project and start a practice session in under 60 seconds.</p>
+      <div class="fui-cta-btns">
+        <a href="/dashboard" class="fui-btn-primary large">
+          <span class="fui-btn-glow"></span>
+          ⚡ Launch Simulator
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ FOOTER ══════════════════ -->
+  <footer class="fui-footer">
+    <div class="fui-footer-inner">
+      <div class="fui-footer-brand">
+        <div class="fui-logo-icon sm">
+          <div class="logo-core">⚡</div>
+        </div>
+        <span>Project Viva Simulator</span>
+      </div>
+      <div class="fui-footer-tech">
+        Flask · Groq · LLaMA 3.3 · Whisper · FAISS · SQLAlchemy
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- AI Mentor Floating Button -->
+  <div class="fui-mentor-fab" id="mentorFab" title="AI Project Mentor">
+    <div class="fab-ring"></div>
+    <span class="fab-icon">🤖</span>
+    <span class="fab-label">AI Mentor</span>
+  </div>
+
+  <!-- AI Mentor Chat Panel -->
+  <div class="fui-mentor-panel" id="mentorPanel">
+    <div class="mentor-panel-header">
+      <div class="mentor-avatar">
+        <div class="logo-ring r1"></div>
+        <div class="logo-core">🧠</div>
+      </div>
+      <div>
+        <div class="mentor-name">Arc Reactor AI</div>
+        <div class="mentor-status"><span class="status-dot"></span> Online</div>
+      </div>
+      <button class="mentor-close" id="mentorClose">✕</button>
+    </div>
+    <div class="mentor-messages" id="mentorMessages">
+      <div class="mentor-msg bot">
+        <div class="msg-content">Hello! I'm your AI Project Mentor. Ask me anything about viva preparation, your project, or technical concepts! 🧠</div>
+      </div>
+    </div>
+    <div class="mentor-input-row">
+      <input type="text" id="mentorInput" placeholder="Ask anything about your viva…" />
+      <button id="mentorSendBtn" class="mentor-send-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="/static/js/landing.js"></script>
+  <script src="/static/js/arc_reactor.js"></script>
+</body>
+</html>

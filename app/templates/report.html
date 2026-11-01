@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance Report – Project Viva Simulator</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/futuristic.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="/static/js/theme.js"></script>
+</head>
+<body class="fui-report-body">
+  <div class="holo-grid" aria-hidden="true"></div>
+  <div class="glow-orb orb-cyan" style="opacity:0.25;" aria-hidden="true"></div>
+  <div class="glow-orb orb-purple" style="opacity:0.15;" aria-hidden="true"></div>
+
+  <!-- ══════════════════ NAVBAR ══════════════════ -->
+  <nav class="fui-navbar">
+    <div class="fui-nav-brand">
+      <a href="/dashboard" class="fui-nav-link" style="font-size:0.85rem;">← Dashboard</a>
+      <span style="color:#2a3a55;margin:0 0.5rem;">|</span>
+      <span style="font-family:var(--font-display,Orbitron);font-size:0.9rem;font-weight:700;color:#94a3b8;letter-spacing:0.1em;">PERFORMANCE REPORT</span>
+    </div>
+    <div class="fui-nav-links" id="fuiNavLinks">
+      <button id="themeToggleBtn" class="fui-theme-btn" title="Toggle theme">
+        <span class="theme-icon">☀️</span>
+      </button>
+      <button onclick="window.print()" class="fui-btn-outline" style="padding:0.4rem 0.8rem;font-size:0.8rem;">🖨️ Print PDF</button>
+    </div>
+    <button class="fui-hamburger" id="mobileMenuBtn"><span></span><span></span><span></span></button>
+  </nav>
+
+  <!-- ══════════════════ REPORT CONTENT ══════════════════ -->
+  <div class="fui-report-wrapper" style="position:relative;z-index:10;">
+
+    <!-- Score Hero -->
+    <div class="fui-report-hero" id="reportHero">
+      <!-- Animated Score Ring -->
+      <div class="fui-report-score-visual">
+        <svg viewBox="0 0 160 160" width="160" height="160">
+          <defs>
+            <linearGradient id="heroRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#00f5ff" />
+              <stop offset="100%" style="stop-color:#4f8ef7" />
+            </linearGradient>
+          </defs>
+          <circle cx="80" cy="80" r="65" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
+          <circle cx="80" cy="80" r="65" fill="none"
+            stroke="url(#heroRingGrad)"
+            stroke-width="8"
+            stroke-linecap="round"
+            stroke-dasharray="408"
+            stroke-dashoffset="408"
+            id="heroScoreRing"
+            style="transform:rotate(-90deg);transform-origin:80px 80px;transition:stroke-dashoffset 1.5s ease;filter:drop-shadow(0 0 8px rgba(0,245,255,0.5));"
+          />
+        </svg>
+        <div class="fui-report-score-text">
+          <div class="fui-score-big" id="bigScore">—</div>
+          <div class="fui-score-slash">/100</div>
+        </div>
+      </div>
+
+      <!-- Report Meta -->
+      <div class="fui-report-meta">
+        <div class="fui-report-project-name" id="reportProjectName">PROJECT</div>
+        <h1 class="fui-report-title" id="reportTitle">AI Viva Performance Report</h1>
+        <div class="fui-grade-badge" id="gradeBadge">—</div>
+        <p id="execSummary" style="font-size:0.875rem;color:#94a3b8;line-height:1.7;margin-bottom:1rem;max-width:500px;"></p>
+        <div class="fui-report-stats-strip">
+          <div class="fui-report-stat">
+            <div class="fui-report-stat-num" id="reportQuestions">—</div>
+            <div class="fui-report-stat-label">Questions</div>
+          </div>
+          <div style="width:1px;height:30px;background:rgba(255,255,255,0.06);"></div>
+          <div class="fui-report-stat">
+            <div class="fui-report-stat-num" id="reportCorrect" style="color:#10b981;">—</div>
+            <div class="fui-report-stat-label">Correct</div>
+          </div>
+          <div style="width:1px;height:30px;background:rgba(255,255,255,0.06);"></div>
+          <div class="fui-report-stat">
+            <div class="fui-report-stat-num" id="reportPartial" style="color:#f59e0b;">—</div>
+            <div class="fui-report-stat-label">Partial</div>
+          </div>
+          <div style="width:1px;height:30px;background:rgba(255,255,255,0.06);"></div>
+          <div class="fui-report-stat">
+            <div class="fui-report-stat-num" id="reportIncorrect" style="color:#f87171;">—</div>
+            <div class="fui-report-stat-label">Incorrect</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save & Email Card -->
+    <div class="fui-email-card" id="saveEmailCard">
+      <div class="fui-card-title">💾 Save & ✉️ Email Report</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:0.25rem;" class="report-save-grid">
+
+        <!-- Save -->
+        <div>
+          <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.75rem;line-height:1.6;">Save your assessment as PDF or standalone HTML file.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+            <button class="fui-btn-outline" id="printReportBtn" style="padding:0.5rem 0.9rem;font-size:0.8rem;">🖨️ Save as PDF</button>
+            <button class="fui-btn-outline" id="downloadHtmlBtn" style="padding:0.5rem 0.9rem;font-size:0.8rem;">📄 Download HTML</button>
+            <button class="fui-btn-outline" id="copySummaryBtn" style="padding:0.5rem 0.9rem;font-size:0.8rem;">📋 Copy Summary</button>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <div style="font-size:0.82rem;color:#64748b;margin-bottom:0.75rem;line-height:1.6;">Send to yourself, your professor, or multiple recipients (comma-separated).</div>
+          <div class="fui-email-input-row" style="margin-top:0;">
+            <input type="text" id="reportEmailInput" class="fui-email-input" placeholder="email@example.com, mentor@univ.edu" autocomplete="email" />
+            <button class="personality-btn" id="speakEmailBtn" title="Speak email address">🎙️</button>
+            <button class="fui-btn-primary" id="sendEmailBtn" style="padding:0.6rem 1rem;white-space:nowrap;font-size:0.85rem;">
+              <span class="fui-btn-glow"></span>
+              <span id="sendEmailBtnText">🚀 Send Email</span>
+              <span id="sendEmailSpinner" style="display:none;">⏳ Sending...</span>
+            </button>
+            <a id="mailtoBtn" class="fui-btn-outline" style="padding:0.6rem 0.9rem;white-space:nowrap;font-size:0.82rem;text-decoration:none;display:inline-flex;align-items:center;gap:0.35rem;" title="Open directly in your device mail app">
+              📬 Mail App
+            </a>
+          </div>
+          <div id="emailStatusBanner" style="margin-top:0.5rem;font-size:0.78rem;"></div>
+          <div id="emailActionsPreview" style="display:none;margin-top:0.75rem;flex-wrap:wrap;gap:0.5rem;">
+            <button class="fui-btn-outline" id="viewEmailPreviewBtn" style="padding:0.4rem 0.75rem;font-size:0.77rem;">👁️ Preview Email</button>
+            <a class="fui-btn-outline" id="downloadEmailFileBtn" target="_blank" style="padding:0.4rem 0.75rem;font-size:0.77rem;text-decoration:none;">📥 Download</a>
+          </div>
+          <div id="emailHelperBox" style="display:none;margin-top:0.75rem;padding:0.75rem;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.15);border-radius:8px;font-size:0.77rem;color:#94a3b8;line-height:1.6;"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;" class="fui-charts-row">
+
+      <!-- Topic Performance -->
+      <div class="fui-report-card">
+        <div class="fui-report-card-title">📈 Topic Performance</div>
+        <div id="topicPerformance" class="topic-list"></div>
+      </div>
+
+      <!-- Radar Chart -->
+      <div class="fui-report-card">
+        <div class="fui-report-card-title">🕸️ Performance Radar</div>
+        <div class="fui-chart-container">
+          <canvas id="radarChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Strengths / Weaknesses Grid -->
+    <div class="fui-report-grid">
+
+      <div class="fui-report-card">
+        <div class="fui-report-card-title">💪 Strengths</div>
+        <ul class="fui-feedback-list success-list" id="strongAreas" style="margin:0;padding:0;"></ul>
+      </div>
+
+      <div class="fui-report-card">
+        <div class="fui-report-card-title">⚠️ Areas for Improvement</div>
+        <ul class="fui-feedback-list error-list" id="weakAreas" style="margin:0;padding:0;"></ul>
+      </div>
+
+      <div class="fui-report-card">
+        <div class="fui-report-card-title">🔁 Repeated Misconceptions</div>
+        <ul class="fui-feedback-list" id="misconceptions" style="margin:0;padding:0;"></ul>
+      </div>
+
+      <div class="fui-report-card">
+        <div class="fui-report-card-title">📖 Recommended Revision</div>
+        <ul class="fui-feedback-list" id="revisionTopics" style="margin:0;padding:0;"></ul>
+      </div>
+
+      <div class="fui-report-card full-width">
+        <div class="fui-report-card-title">🧪 Practice Questions for Next Session</div>
+        <div id="practiceQuestions"></div>
+      </div>
+
+      <div class="fui-report-card full-width">
+        <div class="fui-report-card-title">🎓 Examiner's Final Remarks</div>
+        <div id="examinerComment" style="font-size:0.9rem;color:#cbd5e1;line-height:1.8;font-style:italic;padding:0.5rem 0;border-left:2px solid rgba(0,245,255,0.2);padding-left:1rem;"></div>
+      </div>
+
+      <div class="fui-report-card full-width">
+        <div class="fui-report-card-title">📝 Question-by-Question Review</div>
+        <div id="questionReview"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--glass-border);">
+      <a href="/dashboard" class="fui-btn-outline" style="padding:0.7rem 1.5rem;">🏠 Back to Dashboard</a>
+      <button class="fui-btn-primary" onclick="window.print()" style="padding:0.7rem 1.5rem;">
+        <span class="fui-btn-glow"></span>
+        🖨️ Print / Save PDF
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Email Preview Modal -->
+  <div class="fui-modal-backdrop" id="emailPreviewModal">
+    <div class="fui-modal" style="max-width:780px;width:92vw;height:80vh;padding:1.5rem;display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--glass-border);padding-bottom:0.75rem;margin-bottom:1rem;">
+        <div class="fui-modal-title" style="margin:0;">✉️ Email Preview</div>
+        <button id="closeEmailPreviewBtn" onclick="document.getElementById('emailPreviewModal').classList.remove('open')" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:1.1rem;">✕</button>
+      </div>
+      <iframe id="emailPreviewIframe" style="width:100%;flex:1;border:none;border-radius:10px;background:#0d0f14;"></iframe>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>window.SESSION_ID = {{ session_id }};</script>
+  <script src="/static/js/report.js"></script>
+  <script src="/static/js/arc_reactor.js"></script>
+
+  <script>
+    // Report page enhancements
+    (function() {
+      // Theme toggle
+      const themeBtn = document.getElementById('themeToggleBtn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+          const curr = document.documentElement.getAttribute('data-theme') || 'dark';
+          const next = curr === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('viva-theme', next);
+          const icon = themeBtn.querySelector('.theme-icon');
+          if (icon) icon.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+      }
+
+      // Mobile menu
+      const hamburger = document.getElementById('mobileMenuBtn');
+      const navLinks = document.getElementById('fuiNavLinks');
+      if (hamburger && navLinks) {
+        hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
+      }
+
+      // Animate score ring
+      window.animateHeroRing = function(score) {
+        const ring = document.getElementById('heroScoreRing');
+        if (!ring) return;
+        const circumference = 408;
+        const offset = circumference - (score / 100) * circumference;
+        setTimeout(() => { ring.style.strokeDashoffset = offset; }, 200);
+      };
+
+      // Radar chart
+      window.initRadarChart = function(labels, data) {
+        const canvas = document.getElementById('radarChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        const ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+          type: 'radar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Performance',
+              data: data,
+              backgroundColor: 'rgba(0, 245, 255, 0.1)',
+              borderColor: 'rgba(0, 245, 255, 0.6)',
+              pointBackgroundColor: 'rgba(0, 245, 255, 0.8)',
+              pointBorderColor: 'rgba(0, 245, 255, 0.3)',
+              pointRadius: 4,
+              borderWidth: 2,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+            },
+            scales: {
+              r: {
+                min: 0,
+                max: 100,
+                ticks: {
+                  stepSize: 25,
+                  color: '#64748b',
+                  backdropColor: 'transparent',
+                  font: { size: 10 }
+                },
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                pointLabels: {
+                  color: '#94a3b8',
+                  font: { size: 11, family: 'Inter' }
+                },
+                angleLines: { color: 'rgba(255,255,255,0.05)' },
+              }
+            }
+          }
+        });
+      };
+
+      // Practice question renderer
+      window.renderPracticeQuestions = function(questions) {
+        const container = document.getElementById('practiceQuestions');
+        if (!container) return;
+        if (!questions || !questions.length) {
+          container.innerHTML = '<div style="font-size:0.82rem;color:#64748b;">No practice questions generated.</div>';
+          return;
+        }
+        container.innerHTML = questions.map(q => {
+          const text = typeof q === 'string' ? q : (q.question || '');
+          const diff = typeof q === 'object' ? (q.difficulty || 'medium') : 'medium';
+          const diffColor = diff === 'hard' ? '#f87171' : diff === 'easy' ? '#10b981' : '#f59e0b';
+          return `<div style="padding:0.75rem 1rem;background:rgba(0,0,0,0.2);border-left:2px solid rgba(168,85,247,0.3);border-radius:0 8px 8px 0;margin-bottom:0.5rem;font-size:0.85rem;line-height:1.6;color:#e2e8f0;">
+            <span style="font-size:0.65rem;font-weight:700;color:${diffColor};text-transform:uppercase;letter-spacing:0.08em;">[${diff.toUpperCase()}]</span>
+            <span style="margin-left:0.5rem;">${text}</span>
+          </div>`;
+        }).join('');
+      };
+
+      // Topic bar renderer
+      window.renderTopicBars = function(topics) {
+        const container = document.getElementById('topicPerformance');
+        if (!container || !topics) return;
+        if (!topics.length) {
+          container.innerHTML = '<div style="font-size:0.82rem;color:#64748b;">No topic data available.</div>';
+          return;
+        }
+        container.innerHTML = topics.map(t => {
+          const score = t.score || 0;
+          const assessment = t.assessment || (score >= 75 ? 'strong' : score >= 50 ? 'adequate' : 'weak');
+          const barColor = assessment === 'strong' ? 'linear-gradient(90deg,#10b981,#34d399)' : assessment === 'adequate' ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' : 'linear-gradient(90deg,#ef4444,#f87171)';
+          return `<div class="fui-topic-bar topic-${assessment}">
+            <div class="fui-topic-bar-header">
+              <span class="fui-topic-name">${t.topic || 'Unknown'}</span>
+              <span class="fui-topic-score">${Math.round(score)}/100</span>
+            </div>
+            <div class="fui-topic-bar-track">
+              <div class="fui-topic-bar-fill" style="width:0%;background:${barColor};" data-width="${score}%"></div>
+            </div>
+          </div>`;
+        }).join('');
+
+        // Animate bars
+        setTimeout(() => {
+          document.querySelectorAll('.fui-topic-bar-fill[data-width]').forEach(bar => {
+            bar.style.transition = 'width 0.8s ease';
+            bar.style.width = bar.dataset.width;
+          });
+        }, 200);
+      };
+
+      // Toast helper
+      window.showFuiToast = function(msg, type = 'info') {
+        const t = document.createElement('div');
+        t.className = `fui-toast ${type}`;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        requestAnimationFrame(() => t.classList.add('show'));
+        setTimeout(() => {
+          t.classList.remove('show');
+          setTimeout(() => t.remove(), 400);
+        }, 3500);
+      };
+
+      // Email preview modal
+      document.getElementById('viewEmailPreviewBtn')?.addEventListener('click', () => {
+        document.getElementById('emailPreviewModal').classList.add('open');
+      });
+
+      // GSAP entry animation
+      if (typeof gsap !== 'undefined') {
+        gsap.from('#reportHero', { opacity: 0, y: 30, duration: 0.7, ease: 'power2.out' });
+        gsap.from('.fui-report-card', {
+          opacity: 0, y: 20, duration: 0.5, ease: 'power2.out',
+          stagger: 0.08, delay: 0.3
+        });
+      }
+
+    })();
+  </script>
+</body>
+</html>

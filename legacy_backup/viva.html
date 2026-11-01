@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viva Examination – AI Viva Simulator</title>
+  <meta name="description" content="Take your AI-powered viva voce examination with real-time feedback." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <script src="js/theme.js"></script>
+</head>
+<body>
+  <canvas id="snowCanvas" aria-hidden="true"></canvas>
+
+  <nav class="navbar">
+    <div class="nav-brand">
+      <a href="dashboard.html" class="nav-back">← Dashboard</a>
+      <span class="nav-sep">|</span>
+      <span class="nav-title">Viva Examination</span>
+    </div>
+    <div class="nav-links">
+      <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Light / Dark mode">
+        <span class="theme-icon">☀️</span>
+        <span class="theme-label">Theme</span>
+      </button>
+      <span class="badge badge-medium" id="sessionInfo">Medium · 10 Q</span>
+      <span class="score-display" id="scoreDisplay">Score: —</span>
+      <button class="btn btn-danger btn-sm" id="navEndExamBtn" title="End examination and get performance report">
+        <span>Finish Early ⏹️</span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="viva-container">
+
+    <!-- Left: Examination Flow -->
+    <div class="question-panel">
+
+      <!-- 1. Progress & Exam Header Card -->
+      <section class="exam-progress-card glass-card">
+        <div class="progress-meta-row">
+          <span id="progressLabel" class="progress-counter-badge">Question 1 / 10</span>
+          <div class="exam-quick-actions">
+            <span id="difficultyBadge" class="badge badge-medium">Medium</span>
+          </div>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="examProgressFill" style="width:0%"></div>
+        </div>
+      </section>
+
+      <!-- 2. AI Voice Examiner Banner -->
+      <section class="voice-examiner-bar glass-card" id="voiceExaminerBar">
+        <div class="examiner-avatar-group">
+          <div class="examiner-mini-core" id="examinerAvatar"></div>
+          <div>
+            <div class="examiner-status-label" id="examinerStatusTitle">AI Voice Examiner</div>
+            <div class="examiner-status-sub" id="examinerStatusSub">Demo Mode · Ready</div>
+          </div>
+        </div>
+        <div class="examiner-controls-group">
+          <label class="auto-voice-toggle" title="Automatically speak every question when it appears">
+            <input type="checkbox" id="autoVoiceToggle" checked />
+            <span>Auto-Voice Mode</span>
+          </label>
+          <button class="btn-icon-sm" id="speakQuestionBtn" title="Read question aloud">🔊 Speak</button>
+          <button class="btn-icon-sm" id="muteBtn" title="Mute/unmute speech">🔇</button>
+        </div>
+      </section>
+
+      <!-- 3. Question Card -->
+      <section class="question-block glass-card" id="questionBlock">
+        <div class="question-topic" id="questionTopic">SYSTEM DESIGN</div>
+        <div class="question-text" id="questionText">
+          Explain the advantages of using a microservices architecture over a monolithic architecture for your project, and discuss the trade-offs you considered.
+        </div>
+      </section>
+
+      <!-- 4. Answer Section Card -->
+      <section class="answer-section glass-card" id="answerSection">
+        <!-- Voice recording UI -->
+        <div class="voice-ui" id="voiceUI">
+          <div class="mic-area">
+            <button class="mic-btn" id="micBtn" title="Click to speak your answer">
+              <span class="mic-icon">🎤</span>
+            </button>
+            <div class="recording-status" id="recordingStatus">Click microphone to speak your answer (Demo Mode)</div>
+          </div>
+        </div>
+
+        <!-- Text answer area -->
+        <div class="text-answer-area">
+          <label class="form-label" for="answerTextarea">Your Technical Answer</label>
+          <textarea
+            id="answerTextarea"
+            class="answer-textarea"
+            rows="6"
+            placeholder="Type or dictate your answer here… Explain your reasoning, trade-offs, and technical rationale."
+          ></textarea>
+          <div class="answer-meta">
+            <span class="char-count" id="charCount">0 characters</span>
+          </div>
+        </div>
+
+        <div class="answer-actions">
+          <div class="answer-actions-left">
+            <button class="btn btn-ghost" id="skipBtn">Skip Question</button>
+            <button class="btn btn-danger btn-sm" id="endExamEarlyBtn">End Exam Early</button>
+          </div>
+          <div class="answer-actions-right">
+            <button class="btn btn-primary" id="submitBtn" disabled>
+              <span class="btn-text">Submit Answer</span>
+              <span class="btn-spinner" style="display:none">⏳ Evaluating…</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Feedback Panel (Shown after submission) -->
+      <section class="feedback-panel glass-card" id="feedbackPanel" style="display:none">
+        <div class="feedback-header">
+          <div>
+            <span class="feedback-score-badge" id="feedbackScoreBadge">85/100</span>
+          </div>
+          <span class="correctness-badge correct" id="correctnessBadge">Correct</span>
+        </div>
+
+        <div class="feedback-tabs">
+          <button class="tab-btn active" data-tab="correction">📚 Explanation</button>
+          <button class="tab-btn" data-tab="strengths">✅ Strengths</button>
+          <button class="tab-btn" data-tab="answer">💡 Model Answer</button>
+          <button class="tab-btn" data-tab="evidence">🔍 Evidence</button>
+        </div>
+
+        <div class="tab-content active" id="tab-correction">
+          <div class="feedback-section">
+            <h4>What You Got Right</h4>
+            <ul id="understoodList" class="feedback-list success-list">
+              <li>Correctly identified separation of concerns as a key benefit</li>
+              <li>Good understanding of independent deployment advantages</li>
+            </ul>
+          </div>
+          <div class="feedback-section" id="misconceptionsSection">
+            <h4>Misconceptions / Missing Concepts</h4>
+            <ul id="misconceptionsList" class="feedback-list error-list">
+              <li>Didn't mention network latency as a significant trade-off</li>
+            </ul>
+          </div>
+          <div class="feedback-section">
+            <h4>Correct Reasoning</h4>
+            <div class="feedback-text" id="correctReasoning">Microservices allow teams to work independently on different services, enabling faster development cycles. However, they introduce complexity in service communication, data consistency, and deployment orchestration.</div>
+          </div>
+          <div class="feedback-section" id="detailedSection">
+            <h4>Detailed Step-by-Step Explanation</h4>
+            <div class="feedback-text highlight-block" id="detailedExplanation">1. Microservices decompose a large system into smaller, independently deployable units.<br/>2. Each service owns its data store (database per service pattern).<br/>3. Communication happens via REST APIs or message queues.<br/>4. Trade-offs include increased operational complexity and potential data consistency challenges.</div>
+          </div>
+          <div class="feedback-section">
+            <h4>Example / Analogy</h4>
+            <div class="feedback-text code-style" id="exampleAnalogy">Think of a monolith like a single large factory where everything is produced under one roof. Microservices are like a network of specialized workshops — each excels at one thing and communicates through deliveries (API calls).</div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-strengths">
+          <div class="feedback-section">
+            <h4>Your Strengths</h4>
+            <ul id="strengthsList" class="feedback-list success-list">
+              <li>Clear articulation of scalability benefits</li>
+              <li>Good use of real-world examples</li>
+              <li>Demonstrated understanding of deployment pipelines</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-answer">
+          <div class="feedback-section">
+            <h4>Improved Model Answer</h4>
+            <div class="feedback-text model-answer" id="modelAnswer">Microservices architecture breaks a large application into small, loosely coupled services. Key advantages include independent scaling, technology diversity, fault isolation, and faster CI/CD. However, trade-offs involve increased network communication overhead, distributed data management challenges, and operational complexity requiring robust monitoring and service mesh infrastructure.</div>
+          </div>
+          <div class="feedback-section">
+            <h4>Follow-up Question</h4>
+            <div class="follow-up-box" id="followUpBox">
+              <span class="follow-up-diff" id="followUpDiff">HARD</span>
+              <div class="follow-up-text" id="followUpQuestion">How would you handle distributed transactions across multiple microservices in your project?</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-evidence">
+          <div class="feedback-section">
+            <h4>Project Document Evidence</h4>
+            <ul id="evidenceList" class="feedback-list evidence-list">
+              <li>Section 3.2 – System Architecture: "The application follows a modular design pattern…"</li>
+              <li>Section 4.1 – Technology Stack: "Flask microservices with REST API endpoints…"</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="feedback-actions">
+          <button class="btn btn-primary" id="nextQuestionBtn">
+            Next Question →
+          </button>
+          <button class="btn btn-ghost" id="finishExamBtn" style="display:none">
+            Finish Exam &amp; Get Report
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right: Session Sidebar -->
+    <aside class="session-sidebar">
+      <div class="card sidebar-card glass-card">
+        <h3 class="sidebar-title">📊 Session Progress</h3>
+        <div class="score-ring">
+          <svg viewBox="0 0 80 80" class="ring-svg">
+            <circle cx="40" cy="40" r="32" class="ring-bg" />
+            <circle cx="40" cy="40" r="32" class="ring-fill" id="scoreRing" style="stroke-dashoffset:60;stroke:var(--success)" />
+          </svg>
+          <div class="ring-label">
+            <div class="ring-score" id="ringScore">82</div>
+            <div class="ring-sub">avg score</div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <span>Questions</span>
+          <span id="statQuestions">3/10</span>
+        </div>
+        <div class="stat-row">
+          <span>Correct</span>
+          <span id="statCorrect" style="color:var(--success)">2</span>
+        </div>
+        <div class="stat-row">
+          <span>Partial</span>
+          <span id="statPartial" style="color:var(--warn)">1</span>
+        </div>
+        <div class="stat-row">
+          <span>Incorrect</span>
+          <span id="statIncorrect" style="color:var(--error)">0</span>
+        </div>
+      </div>
+
+      <div class="card sidebar-card glass-card">
+        <h3 class="sidebar-title">📜 Question History</h3>
+        <div class="history-list" id="historyList">
+          <div class="history-item">
+            <div class="history-item-top">
+              <span class="history-q-num">Q1</span>
+              <span class="history-topic">RAG Pipeline</span>
+              <span class="history-score">90/100</span>
+            </div>
+            <div class="history-badge correct">correct</div>
+          </div>
+          <div class="history-item">
+            <div class="history-item-top">
+              <span class="history-q-num">Q2</span>
+              <span class="history-topic">Database Design</span>
+              <span class="history-score">75/100</span>
+            </div>
+            <div class="history-badge partial">partial</div>
+          </div>
+          <div class="history-item">
+            <div class="history-item-top">
+              <span class="history-q-num">Q3</span>
+              <span class="history-topic">API Security</span>
+              <span class="history-score">85/100</span>
+            </div>
+            <div class="history-badge correct">correct</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Early Exit Confirmation Modal -->
+  <div class="viva-modal-backdrop hidden" id="earlyExitModal">
+    <div class="viva-modal-box glass-card">
+      <h3 class="viva-modal-title">Finish Examination Early?</h3>
+      <p class="viva-modal-body" id="earlyExitModalText">
+        You have completed <strong>3 of 10</strong> questions so far with an average score of <strong>82/100</strong>.<br/><br/>Ending now will mark the examination complete and generate your official Performance Report based on your completed answers.
+      </p>
+      <div class="viva-modal-actions">
+        <button class="btn btn-secondary" id="cancelEarlyExitBtn">Continue Exam</button>
+        <button class="btn btn-danger" id="confirmEarlyExitBtn">End Exam &amp; View Report</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/snow.js"></script>
+  <script src="js/viva.js"></script>
+  <script src="js/arc_reactor.js"></script>
+</body>
+</html>
